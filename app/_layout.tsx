@@ -5,8 +5,10 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AppLockScreen } from "@/components/AppLockScreen";
 import { queryClient } from "@/lib/query-client";
 import { AppProvider } from "@/contexts/AppContext";
+import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
 import {
   useFonts,
   Inter_400Regular,
@@ -46,6 +48,13 @@ function RootLayoutNav() {
   );
 }
 
+function LockGate({ children }: { children: React.ReactNode }) {
+  const { appLockEnabled, locked, isLoading } = useSecurity();
+  if (!appLockEnabled || isLoading) return <>{children}</>;
+  if (locked) return <AppLockScreen />;
+  return <>{children}</>;
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -67,9 +76,13 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
-            <AppProvider>
-              <RootLayoutNav />
-            </AppProvider>
+            <SecurityProvider>
+              <AppProvider>
+                <LockGate>
+                  <RootLayoutNav />
+                </LockGate>
+              </AppProvider>
+            </SecurityProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>

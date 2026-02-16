@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,18 @@ import {
   Alert,
   Platform,
   Share,
+  Switch,
+  Modal,
+  TextInput,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useApp } from "@/contexts/AppContext";
+import { useSecurity } from "@/contexts/SecurityContext";
+import { useSmsPermission } from "@/hooks/useSmsPermission";
 import { exportTransactionsCSV } from "@/lib/storage";
+import { setSmsImportedCallback, startSmsListener } from "@/lib/sms";
 import Colors from "@/constants/colors";
 
 interface SettingItemProps {
@@ -49,8 +56,156 @@ function SettingItem({ icon, iconFamily = "Ionicons", label, subtitle, onPress, 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { transactions, categories, refreshData } = useApp();
+  const {
+    hasPermission: smsPermission,
+    checking: smsChecking,
+    isAndroid,
+    request: requestSmsPermission,
+    openAppSettings,
+  } = useSmsPermission();
+  const [smsListening, setSmsListening] = useState(false);
+  const [smsError, setSmsError] = useState<string | null>(null);
+  const {
+    appLockEnabled,
+    setAppLockEnabled,
+    setPin,
+    hasBiometric,
+    hasPin,
+    unlockWithBiometric,
+    unlockWithPin,
+  } = useSecurity();
   const [exporting, setExporting] = useState(false);
+  const [pinModalVisible, setPinModalVisible] = useState(false);
+  const [pinStep, setPinStep] = useState<"set" | "confirm">("set");
+  const [pinValue, setPinValue] = useState("");
+  const [pinConfirm, setPinConfirm] = useState("");
+  const [disablePinModalVisible, setDisablePinModalVisible] = useState(false);
+  const [disablePinValue, setDisablePinValue] = useState("");
   const webTopInset = Platform.OS === "web" ? 67 : 0;
+
+  useEffect(() => {
+    setSmsImportedCallback(refreshData);
+    return () => setSmsImportedCallback(null);
+  }, [refreshData]);
+
+  const handleRequestSmsPermission = async () => {
+    setSmsError(null);
+    const ok = await requestSmsPermission();
+    if (!ok) {
+      Alert.alert(
+        "Permission denied",
+        "Open Settings to grant SMS permission for bank transaction import.",
+        [{ text: "Cancel", style: "cancel" }, { text: "Open Settings", onPress: openAppSettings }],
+      );
+    }
+  };
+
+  const handleStartSmsListening = async () => {
+    setSmsError(null);
+    const result = await startSmsListener();
+    if (result.started) {
+      setSmsListening(true);
+    } else {
+      setSmsError(result.error ?? "Failed to start");
+    }
+  };
+
+  const handleAppLockToggle = async (value: boolean) => {
+    if (value) {
+      if (hasBiometric) {
+        try {
+          const result = await LocalAuthentication.authenticateAsync({
+            promptMessage: "Authenticate to enable App Lock",
+            fallbackLabel: "Use PIN",
+            disableDeviceFallback: false,
+          });
+          if (result.success) {
+            await setAppLockEnabled(true);
+            return;
+          }
+        } catch {
+          // fall through to PIN
+        }
+      }
+      setPinValue("");
+      setPinConfirm("");
+      setPinStep("set");
+      setPinModalVisible(true);
+    } else {
+      if (hasBiometric) {
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Authenticate to disable App Lock",
+          fallbackLabel: "Use PIN",
+          disableDeviceFallback: false,
+        });
+        if (result.success) {
+          await setAppLockEnabled(false);
+        }
+        return;
+      }
+      if (hasPin) {
+        setDisablePinValue("");
+        setDisablePinModalVisible(true);
+      } else {
+        await setAppLockEnabled(false);
+      }
+    }
+  };
+
+  const handlePinModalSubmit = async () => {
+    if (pinStep === "set") {
+      if (pinValue.length < 4) {
+        Alert.alert("PIN too short", "Use at least 4 digits.");
+        return;
+      }
+      setPinStep("confirm");
+      setPinConfirm("");
+      return;
+    }
+    if (pinValue !== pinConfirm) {
+      Alert.alert("PINs don't match", "Try again.");
+      return;
+    }
+    await setPin(pinValue);
+    await setAppLockEnabled(true);
+    setPinModalVisible(false);
+    setPinValue("");
+    setPinConfirm("");
+    setPinStep("set");
+  };
+
+  const handleRequestSmsPermission = async () => {
+    setSmsError(null);
+    const ok = await requestSmsPermission();
+    if (!ok) {
+      Alert.alert(
+        "Permission denied",
+        "Open Settings to grant SMS permission for bank transaction import.",
+        [{ text: "Cancel", style: "cancel" }, { text: "Open Settings", onPress: openAppSettings }],
+      );
+    }
+  };
+
+  const handleStartSmsListening = async () => {
+    setSmsError(null);
+    const result = await startSmsListener();
+    if (result.started) {
+      setSmsListening(true);
+    } else {
+      setSmsError(result.error ?? "Failed to start");
+    }
+  };
+
+  const handleDisablePinSubmit = async () => {
+    const ok = await unlockWithPin(disablePinValue);
+    if (ok) {
+      await setAppLockEnabled(false);
+      setDisablePinModalVisible(false);
+      setDisablePinValue("");
+    } else {
+      Alert.alert("Wrong PIN", "Try again.");
+    }
+  };
 
   const handleExport = async () => {
     if (transactions.length === 0) {
@@ -105,6 +260,100 @@ export default function SettingsScreen() {
       <Text style={styles.title}>Settings</Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        <Text style={styles.sectionLabel}>SECURITY</Text>
+        <View style={styles.section}>
+          <View style={styles.settingItem}>
+            <View style={[styles.settingIcon, { backgroundColor: Colors.primary + "15" }]}>
+              <Ionicons name="lock-closed" size={20} color={Colors.primary} />
+            </View>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>App Lock</Text>
+              <Text style={styles.settingSubtitle}>
+                Lock app with biometrics or PIN when backgrounded
+              </Text>
+            </View>
+            <Switch
+              value={appLockEnabled}
+              onValueChange={handleAppLockToggle}
+              trackColor={{ false: Colors.border, true: Colors.primary + "60" }}
+              thumbColor={appLockEnabled ? Colors.primary : Colors.surface}
+            />
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>{isAndroid ? "SMS IMPORT (ANDROID)" : "SMS IMPORT"}</Text>
+        <View style={styles.section}>
+          {isAndroid ? (
+            <>
+              <Pressable
+                style={styles.settingItem}
+                onPress={handleRequestSmsPermission}
+                disabled={smsChecking}
+              >
+                <View style={[styles.settingIcon, { backgroundColor: Colors.primary + "15" }]}>
+                  <Ionicons name="chatbubble-outline" size={20} color={Colors.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>Enable SMS import</Text>
+                  <Text style={styles.settingSubtitle}>
+                    {smsChecking
+                      ? "Checking…"
+                      : smsPermission
+                        ? "Permission granted"
+                        : "Grant permission to read bank SMS"}
+                  </Text>
+                </View>
+                {smsPermission && <Ionicons name="checkmark-circle" size={22} color={Colors.income} />}
+              </Pressable>
+              <Pressable
+                style={styles.settingItem}
+                onPress={handleStartSmsListening}
+                disabled={!smsPermission || smsListening}
+              >
+                <View style={[styles.settingIcon, { backgroundColor: Colors.primary + "15" }]}>
+                  <Ionicons name="phone-portrait-outline" size={20} color={Colors.primary} />
+                </View>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>Listen for new bank SMS</Text>
+                  <Text style={styles.settingSubtitle}>
+                    {smsListening
+                      ? "Listening… new bank SMS will be imported automatically"
+                      : "Start listening for incoming bank messages"}
+                  </Text>
+                </View>
+              </Pressable>
+              <SettingItem
+                icon="document-text-outline"
+                label="Scan past bank SMS"
+                subtitle="Import from existing bank messages"
+                onPress={() =>
+                  Alert.alert(
+                    "Historical scan",
+                    "Reading past SMS requires a development build (npx expo run:android). Use 'Listen for new bank SMS' to import new messages automatically.",
+                    [{ text: "OK" }],
+                  )
+                }
+              />
+              {smsError ? (
+                <View style={styles.smsErrorWrap}>
+                  <Text style={styles.smsError}>{smsError}</Text>
+                  <Text style={styles.smsErrorHint}>Use a development build (not Expo Go) for SMS.</Text>
+                </View>
+              ) : null}
+            </>
+          ) : (
+            <View style={styles.settingItem}>
+              <View style={[styles.settingIcon, { backgroundColor: Colors.surfaceSecondary }]}>
+                <Ionicons name="chatbubble-outline" size={20} color={Colors.textTertiary} />
+              </View>
+              <View style={styles.settingContent}>
+                <Text style={styles.settingLabel}>SMS import</Text>
+                <Text style={styles.settingSubtitle}>Available on Android only</Text>
+              </View>
+            </View>
+          )}
+        </View>
+
         <Text style={styles.sectionLabel}>DATA</Text>
         <View style={styles.section}>
           <SettingItem
@@ -154,6 +403,71 @@ export default function SettingsScreen() {
           <Text style={styles.footerVersion}>Version 1.0.0</Text>
         </View>
       </ScrollView>
+
+      <Modal visible={pinModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setPinModalVisible(false)}>
+          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.modalTitle}>
+              {pinStep === "set" ? "Set PIN" : "Confirm PIN"}
+            </Text>
+            <Text style={styles.modalSubtitle}>
+              {pinStep === "set"
+                ? "Enter a 4–6 digit PIN to unlock the app."
+                : "Re-enter your PIN."}
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={pinStep === "set" ? pinValue : pinConfirm}
+              onChangeText={pinStep === "set" ? setPinValue : setPinConfirm}
+              placeholder="PIN"
+              placeholderTextColor={Colors.textTertiary}
+              keyboardType="number-pad"
+              maxLength={6}
+              secureTextEntry
+            />
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalButtonSecondary} onPress={() => setPinModalVisible(false)}>
+                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalButtonPrimary} onPress={handlePinModalSubmit}>
+                <Text style={styles.modalButtonPrimaryText}>
+                  {pinStep === "confirm" ? "Enable" : "Next"}
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={disablePinModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setDisablePinModalVisible(false)}>
+          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
+            <Text style={styles.modalTitle}>Enter PIN to disable</Text>
+            <Text style={styles.modalSubtitle}>Enter your app lock PIN.</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={disablePinValue}
+              onChangeText={setDisablePinValue}
+              placeholder="PIN"
+              placeholderTextColor={Colors.textTertiary}
+              keyboardType="number-pad"
+              maxLength={6}
+              secureTextEntry
+            />
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={styles.modalButtonSecondary}
+                onPress={() => setDisablePinModalVisible(false)}
+              >
+                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalButtonPrimary} onPress={handleDisablePinSubmit}>
+                <Text style={styles.modalButtonPrimaryText}>Disable</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -232,6 +546,87 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   footerVersion: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: Colors.textTertiary,
+    marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 340,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "Inter_700Bold",
+    color: Colors.text,
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: Colors.textSecondary,
+    marginBottom: 16,
+  },
+  modalInput: {
+    height: 48,
+    borderWidth: 2,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontFamily: "Inter_500Medium",
+    color: Colors.text,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "flex-end",
+  },
+  modalButtonSecondary: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  modalButtonSecondaryText: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.textSecondary,
+  },
+  modalButtonPrimary: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  modalButtonPrimaryText: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.textInverse,
+  },
+  smsErrorWrap: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  smsError: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: Colors.expense,
+  },
+  smsErrorHint: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     color: Colors.textTertiary,
