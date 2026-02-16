@@ -24,31 +24,22 @@ function RootLayoutNav() {
       <Stack.Screen
         name="add-transaction"
         options={{
-          presentation: "formSheet",
-          sheetAllowedDetents: [0.85],
-          sheetGrabberVisible: true,
+          presentation: "modal",
           headerShown: false,
-          contentStyle: { backgroundColor: "transparent" },
         }}
       />
       <Stack.Screen
         name="add-bank"
         options={{
-          presentation: "formSheet",
-          sheetAllowedDetents: [0.7],
-          sheetGrabberVisible: true,
+          presentation: "modal",
           headerShown: false,
-          contentStyle: { backgroundColor: "transparent" },
         }}
       />
       <Stack.Screen
         name="add-budget"
         options={{
-          presentation: "formSheet",
-          sheetAllowedDetents: [0.6],
-          sheetGrabberVisible: true,
+          presentation: "modal",
           headerShown: false,
-          contentStyle: { backgroundColor: "transparent" },
         }}
       />
     </Stack>

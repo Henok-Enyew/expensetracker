@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -18,6 +19,7 @@ import { getBankById } from "@/constants/banks";
 import Colors from "@/constants/colors";
 
 export default function AddTransactionScreen() {
+  const insets = useSafeAreaInsets();
   const { categories, bankAccounts, addTransaction } = useApp();
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<"expense" | "income">("expense");
@@ -54,113 +56,122 @@ export default function AddTransactionScreen() {
   const canSave = parseFloat(amount) > 0 && categoryId;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="close" size={24} color={Colors.text} />
-        </Pressable>
-        <Text style={styles.title}>Add Transaction</Text>
-        <Pressable
-          onPress={handleSave}
-          disabled={!canSave || saving}
-          style={({ pressed }) => [{ opacity: canSave && !saving ? (pressed ? 0.7 : 1) : 0.4 }]}
-        >
-          <Ionicons name="checkmark" size={24} color={Colors.primary} />
-        </Pressable>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <View style={styles.typeRow}>
-          <Pressable
-            onPress={() => setType("expense")}
-            style={[
-              styles.typeBtn,
-              type === "expense" && { backgroundColor: Colors.expense, borderColor: Colors.expense },
-            ]}
-          >
-            <Ionicons name="arrow-up" size={16} color={type === "expense" ? "#FFF" : Colors.textSecondary} />
-            <Text style={[styles.typeText, type === "expense" && { color: "#FFF" }]}>Expense</Text>
+    <View style={[styles.outerContainer, { paddingTop: insets.top }]}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} hitSlop={12}>
+            <Ionicons name="close" size={24} color={Colors.text} />
           </Pressable>
+          <Text style={styles.title}>Add Transaction</Text>
           <Pressable
-            onPress={() => setType("income")}
-            style={[
-              styles.typeBtn,
-              type === "income" && { backgroundColor: Colors.income, borderColor: Colors.income },
-            ]}
+            onPress={handleSave}
+            disabled={!canSave || saving}
+            hitSlop={12}
+            style={({ pressed }) => [{ opacity: canSave && !saving ? (pressed ? 0.7 : 1) : 0.4 }]}
           >
-            <Ionicons name="arrow-down" size={16} color={type === "income" ? "#FFF" : Colors.textSecondary} />
-            <Text style={[styles.typeText, type === "income" && { color: "#FFF" }]}>Income</Text>
+            <Ionicons name="checkmark" size={24} color={Colors.primary} />
           </Pressable>
         </View>
 
-        <View style={styles.amountContainer}>
-          <Text style={styles.currency}>ETB</Text>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+          <View style={styles.typeRow}>
+            <Pressable
+              onPress={() => setType("expense")}
+              style={[
+                styles.typeBtn,
+                type === "expense" && { backgroundColor: Colors.expense, borderColor: Colors.expense },
+              ]}
+            >
+              <Ionicons name="arrow-up" size={16} color={type === "expense" ? "#FFF" : Colors.textSecondary} />
+              <Text style={[styles.typeText, type === "expense" && { color: "#FFF" }]}>Expense</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setType("income")}
+              style={[
+                styles.typeBtn,
+                type === "income" && { backgroundColor: Colors.income, borderColor: Colors.income },
+              ]}
+            >
+              <Ionicons name="arrow-down" size={16} color={type === "income" ? "#FFF" : Colors.textSecondary} />
+              <Text style={[styles.typeText, type === "income" && { color: "#FFF" }]}>Income</Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.amountContainer}>
+            <Text style={styles.currency}>ETB</Text>
+            <TextInput
+              style={styles.amountInput}
+              placeholder="0.00"
+              placeholderTextColor={Colors.textTertiary}
+              keyboardType="decimal-pad"
+              value={amount}
+              onChangeText={setAmount}
+              autoFocus
+            />
+          </View>
+
           <TextInput
-            style={styles.amountInput}
-            placeholder="0.00"
+            style={styles.descInput}
+            placeholder="Description (optional)"
             placeholderTextColor={Colors.textTertiary}
-            keyboardType="decimal-pad"
-            value={amount}
-            onChangeText={setAmount}
-            autoFocus
+            value={description}
+            onChangeText={setDescription}
           />
-        </View>
 
-        <TextInput
-          style={styles.descInput}
-          placeholder="Description (optional)"
-          placeholderTextColor={Colors.textTertiary}
-          value={description}
-          onChangeText={setDescription}
-        />
+          <Text style={styles.sectionLabel}>Category</Text>
+          <CategoryPicker categories={categories} selectedId={categoryId} onSelect={setCategoryId} />
 
-        <Text style={styles.sectionLabel}>Category</Text>
-        <CategoryPicker categories={categories} selectedId={categoryId} onSelect={setCategoryId} />
+          <Text style={styles.sectionLabel}>Payment Method</Text>
+          <View style={styles.paymentRow}>
+            <Pressable
+              onPress={() => setPaymentMethod("cash")}
+              style={[styles.paymentChip, paymentMethod === "cash" && styles.paymentChipActive]}
+            >
+              <Ionicons name="cash" size={16} color={paymentMethod === "cash" ? Colors.primary : Colors.textSecondary} />
+              <Text style={[styles.paymentText, paymentMethod === "cash" && styles.paymentTextActive]}>
+                Cash
+              </Text>
+            </Pressable>
+            {bankAccounts.map((acc) => {
+              const bank = getBankById(acc.bankId);
+              const isSelected = paymentMethod === acc.id;
+              return (
+                <Pressable
+                  key={acc.id}
+                  onPress={() => setPaymentMethod(acc.id)}
+                  style={[styles.paymentChip, isSelected && styles.paymentChipActive]}
+                >
+                  <View style={[styles.bankDot, { backgroundColor: bank?.color || "#666" }]} />
+                  <Text style={[styles.paymentText, isSelected && styles.paymentTextActive]}>
+                    {bank?.shortName || acc.accountName}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
 
-        <Text style={styles.sectionLabel}>Payment Method</Text>
-        <View style={styles.paymentRow}>
           <Pressable
-            onPress={() => setPaymentMethod("cash")}
-            style={[styles.paymentChip, paymentMethod === "cash" && styles.paymentChipActive]}
+            style={[styles.saveBtn, !canSave && { opacity: 0.5 }]}
+            onPress={handleSave}
+            disabled={!canSave || saving}
           >
-            <Ionicons name="cash" size={16} color={paymentMethod === "cash" ? Colors.primary : Colors.textSecondary} />
-            <Text style={[styles.paymentText, paymentMethod === "cash" && styles.paymentTextActive]}>
-              Cash
-            </Text>
+            <Text style={styles.saveBtnText}>{saving ? "Saving..." : "Save Transaction"}</Text>
           </Pressable>
-          {bankAccounts.map((acc) => {
-            const bank = getBankById(acc.bankId);
-            const isSelected = paymentMethod === acc.id;
-            return (
-              <Pressable
-                key={acc.id}
-                onPress={() => setPaymentMethod(acc.id)}
-                style={[styles.paymentChip, isSelected && styles.paymentChipActive]}
-              >
-                <View style={[styles.bankDot, { backgroundColor: bank?.color || "#666" }]} />
-                <Text style={[styles.paymentText, isSelected && styles.paymentTextActive]}>
-                  {bank?.shortName || acc.accountName}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <Pressable
-          style={[styles.saveBtn, !canSave && { opacity: 0.5 }]}
-          onPress={handleSave}
-          disabled={!canSave || saving}
-        >
-          <Text style={styles.saveBtnText}>{saving ? "Saving..." : "Save Transaction"}</Text>
-        </Pressable>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: Colors.background,
+  },
   container: {
     flex: 1,
+    width: "100%",
     backgroundColor: Colors.background,
   },
   header: {

@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -17,6 +18,7 @@ import { generateId, getCurrentMonth, getMonthName } from "@/lib/utils";
 import Colors from "@/constants/colors";
 
 export default function AddBudgetScreen() {
+  const insets = useSafeAreaInsets();
   const { categories, budgets, saveBudgets } = useApp();
   const [categoryId, setCategoryId] = useState("");
   const [amount, setAmount] = useState("");
@@ -49,9 +51,9 @@ export default function AddBudgetScreen() {
   const canSave = parseFloat(amount) > 0 && categoryId;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="close" size={24} color={Colors.text} />
         </Pressable>
         <Text style={styles.title}>Add Budget</Text>

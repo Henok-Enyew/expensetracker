@@ -8,6 +8,7 @@ import {
   ScrollView,
   Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -17,6 +18,7 @@ import { generateId } from "@/lib/utils";
 import Colors from "@/constants/colors";
 
 export default function AddBankScreen() {
+  const insets = useSafeAreaInsets();
   const { addBankAccount } = useApp();
   const [selectedBank, setSelectedBank] = useState<BankInfo | null>(null);
   const [accountName, setAccountName] = useState("");
@@ -44,9 +46,9 @@ export default function AddBankScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="close" size={24} color={Colors.text} />
         </Pressable>
         <Text style={styles.title}>Add Bank Account</Text>
