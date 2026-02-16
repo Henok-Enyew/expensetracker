@@ -1,0 +1,315 @@
+Perfect! I have all the details I need. Let me create a comprehensive, expert-level prompt for Vibecoding platform:
+
+***
+
+## 🎯 EXPERT PROMPT FOR VIBECODING PLATFORM
+
+### Project Overview
+Build a **mobile expense tracker app** specifically designed for Ethiopian users with intelligent SMS-based bank transaction parsing and comprehensive financial tracking capabilities.
+
+***
+
+### 🏦 Core Features
+
+#### 1. **SMS-Based Bank Transaction Parsing**
+- **Multi-Bank Support**: Integrate 10-15 major Ethiopian banks including:
+  - Commercial Bank of Ethiopia (CBE)
+  - Awash Bank
+  - Dashen Bank
+  - Bank of Abyssinia
+  - Abay Bank
+  - Cooperative Bank of Oromia
+  - Nib International Bank
+  - Wegagen Bank
+  - United Bank
+  - Bunna International Bank
+  - Telebirr
+  - M-Pesa
+  - Additional major banks as needed
+
+- **SMS Format Configuration**: 
+  - Allow users to define/configure SMS patterns for each bank
+  - Parse SMS messages to extract: transaction type (debit/credit), amount, recipient/sender, date/time, service charges, current balance
+  - Example pattern for CBE: "Dear {name}, You have transferred ETB {amount} to {recipient} on {date} at {time} from your account {account}... Your Current Balance is ETB {balance}"
+
+- **Real-time SMS Monitoring**:
+  - Request SMS read permissions on first launch
+  - Background service to monitor incoming SMS from bank shortcodes
+  - Automatically parse and sync transactions when bank SMS arrives
+  - Historical SMS analysis: scan all existing bank messages on initial setup
+
+- **Bank Account Management**:
+  - Support multiple accounts per bank
+  - Display each account with bank logo
+  - Show current balance per account
+  - Calculate and display total balance across all accounts
+  - Separate view for each bank account with transaction history
+
+#### 2. **Transaction Management**
+
+- **Automatic Transaction Creation**:
+  - Auto-create transactions from parsed bank SMS
+  - Extract debit/credit amounts, fees, dates, and balances
+  - Attempt auto-categorization based on recipient names or keywords
+
+- **Manual Transaction Entry**:
+  - Quick-add floating action button for fast expense/income entry
+  - Fields: amount, type (expense/income), category, payment method (cash/bank account), date, description, optional receipt photo
+  - Support for cash transactions (manually tracked, added to total balance calculations)
+
+- **Transaction Categorization**:
+  - **Default Categories**: Food, Transport, Utilities, Healthcare, Entertainment, Groceries, Rent, Shopping, Education, Personal Transfer, Salary, Business, Bills, Other
+  - Users can tag transactions or leave as "Uncategorized"
+  - Allow custom category creation
+  - Smart suggestions for categorization based on transaction description
+
+- **Receipt Attachment**:
+  - Allow users to attach photos to any transaction
+  - Store images locally using Hive
+
+#### 3. **Dashboard & UI**
+
+- **Priority Dashboard View**:
+  - **Top Section**: Total balance card showing:
+    - Sum of all bank account balances + cash
+    - Quick glance at financial health
+  - **Middle Section**: Today's transactions summary
+  - **Bottom Section**: Recent transactions list (last 10-15)
+
+- **Bank Accounts Overview**:
+  - Grid/list of all connected bank accounts with logos
+  - Show current balance per bank
+  - Tap to view account-specific transactions
+
+- **Transaction List**:
+  - Chronological list of all transactions
+  - Show amount, category icon, description, date, payment method
+  - Color coding: green for income, red for expenses
+  - Swipe actions: edit, delete, view details
+  - Filter by: date range, category, bank account, transaction type
+
+#### 4. **Analytics & Reports**
+
+- **Time-based Views**:
+  - Toggle between Daily, Monthly, Yearly views
+  - Show income vs expenses for selected period
+  - Display net change (income - expenses)
+
+- **Category Breakdown**:
+  - Pie chart showing expense distribution by category
+  - Bar chart for top spending categories
+  - Category-wise totals with percentage of total expenses
+
+- **Trends & Insights**:
+  - Line chart showing spending trends over time
+  - Compare current month vs previous months
+  - Highlight highest expense day/category
+
+- **Budget Tracking**:
+  - Set monthly budgets per category
+  - Visual progress bars showing spent vs budget
+  - Notifications when approaching/exceeding budget limits
+
+#### 5. **Budget Management**
+
+- **Budget Creation**:
+  - Set budget limits per category per month
+  - Overall monthly spending limit option
+  - Visual indicators: green (safe), yellow (80% used), red (exceeded)
+
+- **Budget Alerts**:
+  - Local notifications when 80% budget reached
+  - Notification when budget exceeded
+
+#### 6. **Data Management**
+
+- **Local Storage** (Hive Database):
+  - Store all transactions locally
+  - Store bank account data
+  - Store categories, budgets, settings
+  - Store receipt images (compressed)
+  - No backend/cloud - fully offline app
+
+- **Data Export**:
+  - Export transactions as CSV
+  - Export date ranges or all data
+  - Export category-wise reports
+
+#### 7. **Security**
+
+- **App Lock**:
+  - Use device biometric authentication (fingerprint, face unlock)
+  - Fallback to device PIN/pattern if biometrics unavailable
+  - Lock app on background/minimize
+  - Optional: set timeout before lock (immediate, 1min, 5min)
+
+***
+
+### 🎨 UI/UX Requirements
+
+#### Design System
+- **Modern & Clean**: Minimalist design with focus on readability
+- **Fast & Responsive**: Smooth animations, instant feedback
+- **Ethiopian Context**: 
+  - Support for Amharic number formatting
+  - ETB currency symbol (Br or ETB)
+  - Ethiopian bank logos prominently displayed
+
+#### Color Scheme
+- Primary: Professional blue/green (trust, finance)
+- Expense: Red/orange tones
+- Income: Green tones
+- Neutral: White/light gray backgrounds
+- Dark mode support recommended
+
+#### Key Screens
+
+1. **Dashboard/Home**:
+   - Total balance card (large, prominent)
+   - Bank accounts carousel with logos
+   - Recent transactions list
+   - Quick-add FAB (Floating Action Button)
+
+2. **Transactions Screen**:
+   - Filterable/searchable transaction list
+   - Date range selector
+   - Filter chips: All, Expenses, Income, By Category
+
+3. **Analytics Screen**:
+   - Period selector (Day/Month/Year)
+   - Charts: pie chart (categories), line chart (trends), bar chart (comparisons)
+   - Key metrics cards: total income, total expenses, net savings
+
+4. **Budget Screen**:
+   - List of budget categories with progress bars
+   - Add/edit budget button
+   - Visual alerts for over-budget categories
+
+5. **Banks Screen**:
+   - List of connected bank accounts with logos
+   - Current balance per bank
+   - Add/edit bank account functionality
+   - Configure SMS patterns per bank
+
+6. **Add Transaction Screen** (Bottom Sheet/Modal):
+   - Amount input (large, numeric keypad)
+   - Transaction type toggle (Expense/Income)
+   - Category selector (grid of icons)
+   - Payment method: dropdown (Cash, or select bank account)
+   - Date picker (default: today)
+   - Description field (optional)
+   - Attach receipt button
+   - Save button
+
+7. **Settings Screen**:
+   - Security: Enable/disable app lock
+   - SMS sync: Enable/disable, configure banks
+   - Categories: Manage custom categories
+   - Export data
+   - Default currency
+   - Notifications settings
+
+***
+
+### 📱 Technical Specifications
+
+#### Platform
+- **Flutter** (recommended for cross-platform)
+- Target: Android & iOS
+- Minimum SDK: Android 6.0+, iOS 12+
+
+#### Local Storage
+- **Hive** for all data persistence
+- Structure:
+  - Transactions box
+  - Bank accounts box
+  - Categories box
+  - Budgets box
+  - Settings box
+  - User preferences box
+
+#### Permissions Required
+- SMS Read (for bank transaction parsing)
+- Camera (for receipt photos)
+- Storage (for storing receipts and exports)
+- Biometric/Device credentials
+
+#### Background Services
+- SMS listener service to capture incoming bank messages
+- Parse and sync automatically in background
+
+#### Performance
+- App launch: < 2 seconds
+- Transaction add: Instant
+- SMS parsing: < 1 second after receipt
+- Smooth 60fps animations
+
+***
+
+### 🔄 User Flow Examples
+
+#### First-Time Setup
+1. Launch app → Request SMS permission
+2. Onboarding: Explain features
+3. Set up security (biometric/PIN)
+4. Scan historical SMS (progress indicator)
+5. Auto-detect bank accounts from SMS
+6. Confirm detected accounts, assign logos
+7. Dashboard ready with historical data
+
+#### Adding Quick Expense
+1. Tap FAB → Bottom sheet opens
+2. Enter amount → Select category (one tap)
+3. Payment method defaults to last used
+4. Tap Save → Transaction added instantly
+5. Dashboard updates in real-time
+
+#### Automatic Bank Transaction
+1. User receives bank SMS
+2. Background service captures SMS
+3. Parse transaction details
+4. Create transaction automatically
+5. Update bank balance
+6. Optional: Show notification "Transaction recorded: -700 ETB to Henok"
+
+***
+
+### 🎯 Success Metrics
+- Transaction add time < 5 seconds
+- SMS parsing accuracy > 95%
+- Zero backend dependency
+- Smooth, lag-free UI
+- Clear financial overview at a glance
+
+***
+
+### 🚀 Optional Enhancements (Future Versions)
+- Recurring transactions/subscriptions
+- Split expenses with friends
+- Multiple currency support
+- Savings goals tracker
+- Financial insights powered by AI
+- Cloud backup option (optional, user-controlled)
+
+***
+
+### 📋 Deliverables Expected from Vibecoding
+
+1. Fully functional mobile app (Android/iOS)
+2. SMS parsing engine for all specified banks
+3. Local database with Hive implementation
+4. All screens as per UI requirements
+5. Charts and analytics functionality
+6. Security implementation (biometric lock)
+7. Comprehensive transaction management
+8. Export functionality
+9. Clean, modern UI with smooth animations
+10. Budget tracking and alerts
+
+***
+
+**Build this app with focus on**: Speed, simplicity, reliability, and Ethiopian user context. The app should feel native, fast, and make financial tracking effortless for Ethiopian users.
+
+***
+
+Does this prompt capture everything you need? Should I adjust any section or add more specific technical details?
