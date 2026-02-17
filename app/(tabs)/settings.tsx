@@ -11,8 +11,10 @@ import {
   Switch,
   Modal,
   TextInput,
+  Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useApp } from "@/contexts/AppContext";
@@ -84,6 +86,7 @@ export default function SettingsScreen() {
   const [pinConfirm, setPinConfirm] = useState("");
   const [disablePinModalVisible, setDisablePinModalVisible] = useState(false);
   const [disablePinValue, setDisablePinValue] = useState("");
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
   // SMS listener callback is now managed globally by SmsListenerProvider
@@ -360,14 +363,14 @@ export default function SettingsScreen() {
             icon="cash-outline"
             label="Currency"
             subtitle="Ethiopian Birr (ETB)"
-            onPress={() => {}}
+            onPress={() => setCurrencyModalVisible(true)}
             colors={c}
           />
           <SettingItem
             icon="information-circle-outline"
             label="About"
             subtitle="Birr Track v1.0.0"
-            onPress={() => {}}
+            onPress={() => router.push("/about")}
             colors={c}
           />
         </View>
@@ -388,6 +391,12 @@ export default function SettingsScreen() {
           <Text style={[styles.footerText, { color: c.primary }]}>Birr Track</Text>
           <Text style={[styles.footerSubtext, { color: c.textSecondary }]}>Ethiopian Expense Tracker</Text>
           <Text style={[styles.footerVersion, { color: c.textTertiary }]}>Version 1.0.0</Text>
+          <View style={styles.builtByRow}>
+            <Text style={[styles.builtByText, { color: c.textTertiary }]}>Built by </Text>
+            <Pressable onPress={() => Linking.openURL("https://henokenyew.me")}>
+              <Text style={[styles.builtByLink, { color: c.primary }]}>Henok Enyew</Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
 
@@ -450,6 +459,38 @@ export default function SettingsScreen() {
               </Pressable>
               <Pressable style={[styles.modalButtonPrimary, { backgroundColor: c.primary }]} onPress={handleDisablePinSubmit}>
                 <Text style={[styles.modalButtonPrimaryText, { color: c.textInverse }]}>Disable</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal visible={currencyModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setCurrencyModalVisible(false)}>
+          <Pressable style={[styles.modalContent, { backgroundColor: c.surface, borderColor: c.border }]} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.modalTitle, { color: c.text }]}>Select Currency</Text>
+            <Text style={[styles.modalSubtitle, { color: c.textSecondary }]}>
+              More currencies coming soon.
+            </Text>
+            <Pressable
+              style={[styles.currencyOption, { backgroundColor: c.primary + "10", borderColor: c.primary + "30" }]}
+              onPress={() => setCurrencyModalVisible(false)}
+            >
+              <View style={[styles.currencyFlag, { backgroundColor: c.primary + "20" }]}>
+                <Text style={styles.currencyFlagText}>🇪🇹</Text>
+              </View>
+              <View style={styles.currencyInfo}>
+                <Text style={[styles.currencyName, { color: c.text }]}>Ethiopian Birr</Text>
+                <Text style={[styles.currencyCode, { color: c.textSecondary }]}>ETB</Text>
+              </View>
+              <Ionicons name="checkmark-circle" size={24} color={c.primary} />
+            </Pressable>
+            <View style={styles.modalButtons}>
+              <Pressable
+                style={[styles.modalButtonPrimary, { backgroundColor: c.primary, flex: 1 }]}
+                onPress={() => setCurrencyModalVisible(false)}
+              >
+                <Text style={[styles.modalButtonPrimaryText, { color: c.textInverse, textAlign: "center" }]}>Done</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -665,5 +706,50 @@ const styles = StyleSheet.create({
     fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     marginTop: 4,
+  },
+  builtByRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  builtByText: {
+    fontSize: 13,
+    fontFamily: "Rubik_400Regular",
+  },
+  builtByLink: {
+    fontSize: 13,
+    fontFamily: "Rubik_600SemiBold",
+    textDecorationLine: "underline",
+  },
+  currencyOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 12,
+    marginBottom: 20,
+  },
+  currencyFlag: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  currencyFlagText: {
+    fontSize: 22,
+  },
+  currencyInfo: {
+    flex: 1,
+    gap: 1,
+  },
+  currencyName: {
+    fontSize: 15,
+    fontFamily: "Rubik_500Medium",
+  },
+  currencyCode: {
+    fontSize: 12,
+    fontFamily: "Rubik_400Regular",
   },
 });
