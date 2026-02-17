@@ -115,8 +115,8 @@ function hashCode(str: string): number {
 
 export const parseCbeSms: BankSmsParser = (sms) => {
   const { body, date, id } = sms;
-  const upper = body.toUpperCase();
-  if (!upper.includes("CBE") && !upper.includes("COMMERCIAL BANK")) return null;
+  // CBE SMS often don't include "CBE" in the body, so we rely on pattern matching
+  // instead of keyword filtering. The caller already knows it's CBE by sender or bankId.
 
   const smsId = id || generateSmsIdSync(body, date);
   const accountMask = extractAccountMask(body);
@@ -328,8 +328,7 @@ export const parseTelebirrSms: BankSmsParser = (sms) => {
 
 export const parseBoaSms: BankSmsParser = (sms) => {
   const { body, date, id } = sms;
-  const lower = body.toLowerCase();
-  if (!lower.includes("abyssinia") && !lower.includes("boa")) return null;
+  // BOA detection: rely on pattern matching; keyword check only for auto-detect
 
   const smsId = id || generateSmsIdSync(body, date);
   const timestamp = extractDate(body, date);
@@ -449,29 +448,61 @@ export const bankSmsParsers: Record<string, BankSmsParser> = {
 
 /**
  * Parse an SMS body for a specific bank.
+ * When bankId is known, we skip body-based bank detection and go straight to
+ * pattern matching, which is much more reliable.
  */
 export function parseBankSms(
   bankId: string,
   sms: { sender: string; body: string; date: number; id: string },
 ): ParsedBankSms | null {
-  const parser = bankSmsParsers[bankId] ?? parseGenericSms;
-  const result = parser(sms);
-  if (result && result.bankId === "unknown") {
-    result.bankId = bankId;
+  // Try the specific parser first
+  const specificParser = bankSmsParsers[bankId];
+  if (specificParser) {
+    const result = specificParser(sms);
+    if (result) {
+      if (result.bankId === "unknown") result.bankId = bankId;
+      return result;
+    }
   }
-  return result;
+
+  // Fallback: try the generic parser
+  const result = parseGenericSms(sms);
+  if (result) {
+    result.bankId = bankId;
+    return result;
+  }
+  return null;
 }
 
 /**
  * Try all parsers and return the first match. Useful when bank is unknown.
+ * Uses body-based detection hints to prioritize parsers.
  */
 export function parseSmsAutoDetect(
   sms: { sender: string; body: string; date: number; id: string },
 ): ParsedBankSms | null {
+  const upper = sms.body.toUpperCase();
+
+  // Try specific parsers based on body keywords
+  if (upper.includes("CBE") || upper.includes("COMMERCIAL BANK") || /Dear\s+\w+\s+your\s+Account\s+\d\*+\d+/i.test(sms.body)) {
+    const result = parseCbeSms(sms);
+    if (result) return result;
+  }
+  if (upper.includes("TELEBIRR") || upper.includes("ETHIO TELECOM")) {
+    const result = parseTelebirrSms(sms);
+    if (result) return result;
+  }
+  if (upper.includes("ABYSSINIA") || upper.includes("BOA")) {
+    const result = parseBoaSms(sms);
+    if (result) return result;
+  }
+
+  // Try all specific parsers
   for (const [bankId, parser] of Object.entries(bankSmsParsers)) {
-    if (bankId === "unknown") continue;
     const result = parser(sms);
     if (result) return result;
   }
-  return null;
+
+  // Last resort: generic
+  return parseGenericSms(sms);
 }

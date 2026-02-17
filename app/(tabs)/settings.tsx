@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -19,7 +19,6 @@ import { useApp } from "@/contexts/AppContext";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
 import { exportTransactionsCSV } from "@/lib/storage";
-import { setSmsImportedCallback } from "@/lib/sms";
 import { useTheme, useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
@@ -87,10 +86,7 @@ export default function SettingsScreen() {
   const [disablePinValue, setDisablePinValue] = useState("");
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
-  useEffect(() => {
-    setSmsImportedCallback(refreshData);
-    return () => setSmsImportedCallback(null);
-  }, [refreshData]);
+  // SMS listener callback is now managed globally by SmsListenerProvider
 
   const handleRequestSmsPermission = async () => {
     setSmsError(null);

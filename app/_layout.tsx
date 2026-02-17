@@ -10,6 +10,7 @@ import { queryClient } from "@/lib/query-client";
 import { AppProvider } from "@/contexts/AppContext";
 import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
 import { ThemeProvider, useColors } from "@/contexts/ThemeContext";
+import { SmsListenerProvider } from "@/components/SmsListenerProvider";
 import {
   useFonts,
   Rubik_400Regular,
@@ -96,9 +97,11 @@ export default function RootLayout() {
             <ThemeProvider>
               <SecurityProvider>
                 <AppProvider>
-                  <LockGate>
-                    <RootLayoutNav />
-                  </LockGate>
+                  <SmsListenerProvider>
+                    <LockGate>
+                      <RootLayoutNav />
+                    </LockGate>
+                  </SmsListenerProvider>
                 </AppProvider>
               </SecurityProvider>
             </ThemeProvider>
