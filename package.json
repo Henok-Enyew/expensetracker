@@ -76,5 +76,12 @@
     "patch-package": "^8.0.0",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["@maniac-tech/react-native-expo-read-sms"]
+      }
+    }
+  }
 }

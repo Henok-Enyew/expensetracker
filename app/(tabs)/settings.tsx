@@ -174,28 +174,6 @@ export default function SettingsScreen() {
     setPinStep("set");
   };
 
-  const handleRequestSmsPermission = async () => {
-    setSmsError(null);
-    const ok = await requestSmsPermission();
-    if (!ok) {
-      Alert.alert(
-        "Permission denied",
-        "Open Settings to grant SMS permission for bank transaction import.",
-        [{ text: "Cancel", style: "cancel" }, { text: "Open Settings", onPress: openAppSettings }],
-      );
-    }
-  };
-
-  const handleStartSmsListening = async () => {
-    setSmsError(null);
-    const result = await startSmsListener();
-    if (result.started) {
-      setSmsListening(true);
-    } else {
-      setSmsError(result.error ?? "Failed to start");
-    }
-  };
-
   const handleDisablePinSubmit = async () => {
     const ok = await unlockWithPin(disablePinValue);
     if (ok) {
