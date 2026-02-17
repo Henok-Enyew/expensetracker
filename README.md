@@ -55,7 +55,7 @@ Built with React Native + Expo (SDK 54), TypeScript, and local-first storage.
 | Storage | AsyncStorage (local-first, no backend required) |
 | Animations | React Native Reanimated 4 + React Native SVG |
 | Auth | expo-local-authentication (biometric) + expo-secure-store (PIN) |
-| SMS | Custom Expo module (`modules/sms-inbox`) + `@maniac-tech/react-native-expo-read-sms` |
+| SMS | Custom Expo native module (`modules/sms-inbox`) — inbox reading + real-time BroadcastReceiver |
 | Fonts | `@expo-google-fonts/rubik` |
 | Icons | `@expo/vector-icons` (Ionicons) |
 

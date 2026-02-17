@@ -22,7 +22,6 @@
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/rubik": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
-    "@maniac-tech/react-native-expo-read-sms": "^9.0.2-alpha",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@stardazed/streams-text-encoding": "^1.0.2",
     "@tanstack/react-query": "^5.83.0",
@@ -84,9 +83,7 @@
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
-        "exclude": [
-          "@maniac-tech/react-native-expo-read-sms"
-        ]
+        "exclude": []
       }
     }
   }

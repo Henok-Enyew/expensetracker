@@ -1,14 +1,18 @@
 import { useState, useCallback, useEffect } from "react";
-import { Platform, Linking, AppState } from "react-native";
+import { Platform, Linking, AppState, PermissionsAndroid } from "react-native";
 
 const isAndroid = Platform.OS === "android";
 
 async function checkSmsPermission(): Promise<boolean> {
   if (!isAndroid) return false;
   try {
-    const { checkIfHasSMSPermission } = await import("@maniac-tech/react-native-expo-read-sms");
-    const result = await checkIfHasSMSPermission();
-    return !!(result?.hasReadSmsPermission && result?.hasReceiveSmsPermission);
+    const readGranted = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.READ_SMS,
+    );
+    const receiveGranted = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+    );
+    return readGranted && receiveGranted;
   } catch {
     return false;
   }
@@ -17,9 +21,14 @@ async function checkSmsPermission(): Promise<boolean> {
 async function requestSmsPermission(): Promise<boolean> {
   if (!isAndroid) return false;
   try {
-    const { requestReadSMSPermission } = await import("@maniac-tech/react-native-expo-read-sms");
-    const granted = await requestReadSMSPermission();
-    return !!granted;
+    const results = await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.READ_SMS,
+      PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+    ]);
+    return (
+      results[PermissionsAndroid.PERMISSIONS.READ_SMS] === "granted" &&
+      results[PermissionsAndroid.PERMISSIONS.RECEIVE_SMS] === "granted"
+    );
   } catch {
     return false;
   }

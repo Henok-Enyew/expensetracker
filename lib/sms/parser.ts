@@ -225,8 +225,8 @@ export const parseCbeSms: BankSmsParser = (sms) => {
 
 export const parseTelebirrSms: BankSmsParser = (sms) => {
   const { body, date, id } = sms;
-  const lower = body.toLowerCase();
-  if (!lower.includes("telebirr") && !lower.includes("ethio telecom")) return null;
+  // No keyword filter here — the caller determines bank identity by sender ("127")
+  // or by parseSmsAutoDetect which checks body keywords before calling this.
 
   const smsId = id || generateSmsIdSync(body, date);
   const timestamp = extractDate(body, date);
@@ -488,7 +488,7 @@ export function parseSmsAutoDetect(
     const result = parseCbeSms(sms);
     if (result) return result;
   }
-  if (upper.includes("TELEBIRR") || upper.includes("ETHIO TELECOM")) {
+  if (upper.includes("TELEBIRR") || upper.includes("ETHIO TELECOM") || upper.includes("ETHIO_TELECOM")) {
     const result = parseTelebirrSms(sms);
     if (result) return result;
   }
