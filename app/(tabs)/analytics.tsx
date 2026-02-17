@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     paddingHorizontal: 20,
     paddingTop: 8,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   },
   periodText: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   periodTextActive: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   },
   periodLabel: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
     paddingHorizontal: 20,
     marginTop: 8,
@@ -238,12 +238,12 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   metricValue: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   netCard: {
     marginHorizontal: 20,
@@ -258,16 +258,16 @@ const styles = StyleSheet.create({
   },
   netLabel: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   netValue: {
     fontSize: 24,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   txnCount: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
   },
   chartSection: {
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 16,
   },
@@ -303,7 +303,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
   },
   topSpending: {
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   barRank: {
     width: 20,
     fontSize: 14,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.textTertiary,
     textAlign: "center",
   },
@@ -333,12 +333,12 @@ const styles = StyleSheet.create({
   },
   barLabel: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   barValue: {
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
   barTrack: {

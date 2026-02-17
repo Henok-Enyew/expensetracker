@@ -85,7 +85,7 @@ export default function HomeScreen() {
                 onPress={() => {}}
               >
                 <View style={[styles.cashIcon, { backgroundColor: c.primary + "15" }]}>
-                  <Ionicons name="cash" size={22} color={c.primary} />
+                  <Ionicons name="cash-outline" size={22} color={c.primary} />
                 </View>
                 <Text style={[styles.cashLabel, { color: c.text }]}>Cash</Text>
                 <Text style={[styles.cashBalance, { color: c.textSecondary }]}>ETB {cashBalance.toLocaleString()}</Text>
@@ -107,7 +107,7 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>Accounts</Text>
             </View>
             <Pressable style={styles.emptyAccounts} onPress={() => router.push("/add-bank")}>
-              <Ionicons name="add-circle" size={36} color={Colors.primary} />
+              <Ionicons name="add-circle-outline" size={36} color={Colors.primary} />
               <Text style={styles.emptyAccountsText}>Add your first bank account</Text>
             </Pressable>
           </View>
@@ -120,7 +120,7 @@ export default function HomeScreen() {
             onPress={() => router.push("/(tabs)/friends")}
           >
             <View style={styles.friendsCardLeft}>
-              <Ionicons name="people" size={18} color={c.primary} />
+              <Ionicons name="people-outline" size={18} color={c.primary} />
               <Text style={[styles.friendsCardLabel, { color: c.text }]}>Net with friends</Text>
             </View>
             <Text
@@ -141,13 +141,13 @@ export default function HomeScreen() {
             <Text style={[styles.sectionTitle, { color: c.text }]}>Today</Text>
             <View style={styles.todaySummary}>
               <View style={styles.todayStat}>
-                <Ionicons name="arrow-down-circle" size={18} color={Colors.income} />
+                <Ionicons name="arrow-down-circle-outline" size={18} color={Colors.income} />
                 <Text style={styles.todayStatText}>
                   +ETB {todayTxns.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0).toLocaleString()}
                 </Text>
               </View>
               <View style={styles.todayStat}>
-                <Ionicons name="arrow-up-circle" size={18} color={Colors.expense} />
+                <Ionicons name="arrow-up-circle-outline" size={18} color={Colors.expense} />
                 <Text style={styles.todayStatText}>
                   -ETB {todayTxns.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0).toLocaleString()}
                 </Text>
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   subtitle: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginTop: 2,
   },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   historyBtn: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.primary,
   },
   accountsRow: {
@@ -286,12 +286,12 @@ const styles = StyleSheet.create({
   },
   cashLabel: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   cashBalance: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
   emptyAccounts: {
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
   },
   emptyAccountsText: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.primary,
   },
   todaySummary: {
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
   },
   todayStatText: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   txnList: {
@@ -338,12 +338,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   emptyText: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   friendsCard: {
@@ -366,12 +366,12 @@ const styles = StyleSheet.create({
   },
   friendsCardLabel: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   friendsCardValue: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
   fab: {
     position: "absolute",

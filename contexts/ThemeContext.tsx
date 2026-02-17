@@ -37,69 +37,69 @@ interface ThemeColors {
 }
 
 const LIGHT_COLORS: ThemeColors = {
-  primary: "#0D7C5F",
-  primaryLight: "#12A37D",
-  primaryDark: "#095C47",
-  accent: "#D4A843",
+  primary: "#45234E",
+  primaryLight: "#927C9C",
+  primaryDark: "#361B3E",
+  accent: "#E8734A",
 
   income: "#22C55E",
   incomeLight: "#DCFCE7",
   expense: "#EF4444",
   expenseLight: "#FEE2E2",
 
-  background: "#F8FAFB",
+  background: "#F5F2F6",
   surface: "#FFFFFF",
-  surfaceSecondary: "#F1F5F9",
-  surfaceTertiary: "#E8EDF2",
+  surfaceSecondary: "#E7DBE9",
+  surfaceTertiary: "#C2B5BF",
 
-  text: "#0F172A",
-  textSecondary: "#64748B",
-  textTertiary: "#94A3B8",
+  text: "#1C0F22",
+  textSecondary: "#927C9C",
+  textTertiary: "#C2B5BF",
   textInverse: "#FFFFFF",
 
-  border: "#E2E8F0",
-  borderLight: "#F1F5F9",
-  divider: "#F1F5F9",
+  border: "#E7DBE9",
+  borderLight: "#F0EAF1",
+  divider: "#E7DBE9",
 
   card: "#FFFFFF",
-  cardShadow: "rgba(15, 23, 42, 0.06)",
+  cardShadow: "rgba(69, 35, 78, 0.08)",
 
   navBackground: "#FFFFFF",
-  navActive: "#0D7C5F",
-  navInactive: "#94A3B8",
+  navActive: "#45234E",
+  navInactive: "#C2B5BF",
 };
 
 const DARK_COLORS: ThemeColors = {
-  primary: "#12A37D",
-  primaryLight: "#15C99A",
-  primaryDark: "#0D7C5F",
-  accent: "#E8C36A",
+  primary: "#C2B5BF",
+  primaryLight: "#E7DBE9",
+  primaryDark: "#927C9C",
+  accent: "#E8734A",
 
   income: "#34D399",
-  incomeLight: "#064E3B",
+  incomeLight: "#1A3A2F",
   expense: "#F87171",
-  expenseLight: "#7F1D1D",
+  expenseLight: "#3D1F1F",
 
-  background: "#0F172A",
-  surface: "#1E293B",
-  surfaceSecondary: "#334155",
-  surfaceTertiary: "#475569",
+  background: "#1C0F22",
+  surface: "#2A1832",
+  surfaceSecondary: "#362242",
+  surfaceTertiary: "#45234E",
 
-  text: "#F8FAFC",
-  textSecondary: "#94A3B8",
-  textTertiary: "#64748B",
-  textInverse: "#0F172A",
+  text: "#F0EAF1",
+  textSecondary: "#C2B5BF",
+  textTertiary: "#927C9C",
+  textInverse: "#1C0F22",
 
-  border: "#334155",
-  borderLight: "#1E293B",
-  divider: "#334155",
+  border: "#362242",
+  borderLight: "#2A1832",
+  divider: "#362242",
 
-  card: "#1E293B",
-  cardShadow: "rgba(0, 0, 0, 0.3)",
+  card: "#2A1832",
+  cardShadow: "rgba(0, 0, 0, 0.4)",
 
-  navBackground: "#1E293B",
-  navActive: "#12A37D",
-  navInactive: "#64748B",
+  navBackground: "#221430",
+  navActive: "#E7DBE9",
+  navInactive: "#927C9C",
 };
 
 interface ThemeContextValue {

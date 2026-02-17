@@ -105,7 +105,7 @@ export default function AddBankScreen() {
                     <Text style={styles.bankLogoText}>{bank.iconLetter}</Text>
                   </View>
                 )}
-                <Text style={[styles.bankName, { color: c.text }, isSelected && { fontFamily: "Inter_600SemiBold" as const }]} numberOfLines={1}>
+                <Text style={[styles.bankName, { color: c.text }, isSelected && { fontFamily: "Rubik_600SemiBold" as const }]} numberOfLines={1}>
                   {bank.shortName}
                 </Text>
               </Pressable>
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   content: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 10,
     marginTop: 16,
@@ -243,17 +243,17 @@ const styles = StyleSheet.create({
   bankLogoText: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   bankName: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     textAlign: "center",
   },
   input: {
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     backgroundColor: Colors.surfaceSecondary,
     borderRadius: 12,
@@ -269,13 +269,13 @@ const styles = StyleSheet.create({
   },
   currencyLabel: {
     fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.textSecondary,
   },
   balanceInput: {
     flex: 1,
     fontSize: 24,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     paddingVertical: 14,
   },
@@ -302,12 +302,12 @@ const styles = StyleSheet.create({
   },
   smsTitle: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   smsSubtitle: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginTop: 2,
     lineHeight: 17,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   smsHintText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.income,
     lineHeight: 17,
   },
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
 });

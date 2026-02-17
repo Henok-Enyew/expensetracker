@@ -47,7 +47,7 @@ export default function FriendsScreen() {
       <View style={styles.header}>
         <Text style={[styles.title, { color: c.text }]}>Friends</Text>
         <Pressable onPress={handleAddFriend} style={[styles.addBtn, { backgroundColor: c.primary }]}>
-          <Ionicons name="person-add" size={18} color={c.textInverse} />
+          <Ionicons name="person-add-outline" size={18} color={c.textInverse} />
         </Pressable>
       </View>
 
@@ -193,7 +193,7 @@ export default function FriendsScreen() {
       </ScrollView>
 
       <Pressable style={[styles.fab, { backgroundColor: c.primary, shadowColor: c.primary }]} onPress={handleAddFriend}>
-        <Ionicons name="person-add" size={24} color={c.textInverse} />
+        <Ionicons name="person-add-outline" size={24} color={c.textInverse} />
       </Pressable>
     </View>
   );
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   addBtn: {
@@ -241,13 +241,13 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
     marginBottom: 4,
   },
   summaryValue: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   netCard: {
     marginHorizontal: 20,
@@ -261,17 +261,17 @@ const styles = StyleSheet.create({
   },
   netLabel: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
     marginBottom: 4,
   },
   netValue: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   netHint: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     marginTop: 4,
   },
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 12,
   },
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   friendInfo: {
     flex: 1,
@@ -316,17 +316,17 @@ const styles = StyleSheet.create({
   },
   friendName: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   friendSub: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   friendNet: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
   emptyState: {
     alignItems: "center",
@@ -335,12 +335,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   emptyText: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     textAlign: "center",
   },

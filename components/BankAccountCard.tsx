@@ -28,7 +28,7 @@ export function BankAccountCard({ account, onPress }: BankAccountCardProps) {
     >
       {account.smsSyncEnabled && (
         <View style={styles.syncBadge}>
-          <Ionicons name="sync-circle" size={14} color={c.primary} />
+          <Ionicons name="sync-circle-outline" size={14} color={c.primary} />
         </View>
       )}
       {bank.logo ? (
@@ -81,16 +81,16 @@ const styles = StyleSheet.create({
   logoText: {
     color: "#FFFFFF",
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   bankName: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   balance: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
 });

@@ -12,11 +12,11 @@ import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
 import { ThemeProvider, useColors } from "@/contexts/ThemeContext";
 import {
   useFonts,
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from "@expo-google-fonts/inter";
+  Rubik_400Regular,
+  Rubik_500Medium,
+  Rubik_600SemiBold,
+  Rubik_700Bold,
+} from "@expo-google-fonts/rubik";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -74,10 +74,10 @@ function LockGate({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
+    Rubik_400Regular,
+    Rubik_500Medium,
+    Rubik_600SemiBold,
+    Rubik_700Bold,
   });
 
   useEffect(() => {

@@ -135,11 +135,11 @@ export default function AddTransactionScreen() {
                 paymentMethod === "cash" && { borderColor: c.primary, backgroundColor: c.primary + "10" },
               ]}
             >
-              <Ionicons name="cash" size={16} color={paymentMethod === "cash" ? c.primary : c.textSecondary} />
+              <Ionicons name="cash-outline" size={16} color={paymentMethod === "cash" ? c.primary : c.textSecondary} />
               <Text style={[
                 styles.paymentText,
                 { color: c.textSecondary },
-                paymentMethod === "cash" && { color: c.primary, fontFamily: "Inter_600SemiBold" },
+                paymentMethod === "cash" && { color: c.primary, fontFamily: "Rubik_600SemiBold" },
               ]}>
                 Cash
               </Text>
@@ -161,7 +161,7 @@ export default function AddTransactionScreen() {
                   <Text style={[
                     styles.paymentText,
                     { color: c.textSecondary },
-                    isSelected && { color: c.primary, fontFamily: "Inter_600SemiBold" },
+                    isSelected && { color: c.primary, fontFamily: "Rubik_600SemiBold" },
                   ]}>
                     {bank?.shortName || acc.accountName}
                   </Text>
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   content: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   },
   typeText: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
   amountContainer: {
@@ -240,18 +240,18 @@ const styles = StyleSheet.create({
   },
   currency: {
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.textSecondary,
   },
   amountInput: {
     flex: 1,
     fontSize: 36,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   descInput: {
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     backgroundColor: Colors.surfaceSecondary,
     borderRadius: 12,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 8,
   },
@@ -287,12 +287,12 @@ const styles = StyleSheet.create({
   },
   paymentText: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   paymentTextActive: {
     color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
   bankDot: {
     width: 12,
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
 });

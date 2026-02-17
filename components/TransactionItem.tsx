@@ -65,16 +65,16 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   date: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
   },
   amount: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
 });

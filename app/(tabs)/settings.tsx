@@ -236,7 +236,7 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <View style={styles.settingItem}>
             <View style={[styles.settingIcon, { backgroundColor: c.primary + "15" }]}>
-              <Ionicons name="lock-closed" size={20} color={c.primary} />
+              <Ionicons name="lock-closed-outline" size={20} color={c.primary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={[styles.settingLabel, { color: c.text }]}>App Lock</Text>
@@ -275,7 +275,7 @@ export default function SettingsScreen() {
                         : "Grant permission to read bank SMS"}
                   </Text>
                 </View>
-                {smsPermission && <Ionicons name="checkmark-circle" size={22} color={c.income} />}
+                {smsPermission && <Ionicons name="checkmark-circle-outline" size={22} color={c.income} />}
               </Pressable>
               <View style={[styles.smsHintWrap, { borderTopColor: c.borderLight }]}>
                 <Ionicons name="information-circle-outline" size={16} color={c.textTertiary} />
@@ -313,7 +313,7 @@ export default function SettingsScreen() {
             colors={c}
           />
           <SettingItem
-            icon="refresh"
+            icon="refresh-outline"
             label="Refresh Data"
             subtitle="Reload all data from storage"
             onPress={refreshData}
@@ -325,7 +325,7 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <View style={styles.settingItem}>
             <View style={[styles.settingIcon, { backgroundColor: c.primary + "15" }]}>
-              <Ionicons name={isDark ? "moon" : "sunny"} size={20} color={c.primary} />
+              <Ionicons name={isDark ? "moon-outline" : "sunny-outline"} size={20} color={c.primary} />
             </View>
             <View style={styles.settingContent}>
               <Text style={[styles.settingLabel, { color: c.text }]}>Theme</Text>
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     paddingHorizontal: 20,
     paddingTop: 8,
@@ -478,7 +478,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textTertiary,
     paddingHorizontal: 20,
     marginTop: 20,
@@ -513,12 +513,12 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   settingSubtitle: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   footer: {
@@ -528,17 +528,17 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.primary,
   },
   footerSubtext: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   footerVersion: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     marginTop: 4,
   },
@@ -560,13 +560,13 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     marginBottom: 6,
   },
   modalSubtitle: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginBottom: 16,
   },
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 16,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
     marginBottom: 20,
   },
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
   },
   modalButtonSecondaryText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
   modalButtonPrimary: {
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
   },
   modalButtonPrimaryText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
   themeRow: {
@@ -630,12 +630,12 @@ const styles = StyleSheet.create({
   },
   themeOptionText: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   themeOptionTextActive: {
     color: Colors.primary,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
   smsHintWrap: {
     flexDirection: "row",
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
   smsHintText: {
     flex: 1,
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     lineHeight: 18,
   },
@@ -661,12 +661,12 @@ const styles = StyleSheet.create({
   },
   smsError: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.expense,
   },
   smsErrorHint: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     marginTop: 4,
   },

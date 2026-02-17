@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   content: {
@@ -144,19 +144,19 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 32,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.primary,
   },
   label: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 8,
     marginTop: 16,
   },
   input: {
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     backgroundColor: Colors.surfaceSecondary,
     borderRadius: 12,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
 });

@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 17,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   content: {
@@ -129,13 +129,13 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
     marginBottom: 16,
   },
   sectionLabel: {
     fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 8,
     marginTop: 16,
@@ -147,13 +147,13 @@ const styles = StyleSheet.create({
   },
   currency: {
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.textSecondary,
   },
   amountInput: {
     flex: 1,
     fontSize: 32,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   saveBtn: {
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
   emptyState: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
 });

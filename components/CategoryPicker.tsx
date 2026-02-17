@@ -38,7 +38,7 @@ export function CategoryPicker({ categories, selectedId, onSelect }: CategoryPic
               style={[
                 styles.name,
                 { color: c.text },
-                isSelected && { color: cat.color, fontFamily: "Inter_600SemiBold" },
+                isSelected && { color: cat.color, fontFamily: "Rubik_600SemiBold" },
               ]}
               numberOfLines={1}
             >
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
   },
 });

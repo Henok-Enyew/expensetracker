@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   bankCard: {
@@ -321,19 +321,19 @@ const styles = StyleSheet.create({
   bankLogoText: {
     color: "#FFFFFF",
     fontSize: 20,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   bankInfo: {
     flex: 1,
   },
   bankName: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   accountName: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginTop: 2,
   },
@@ -342,18 +342,18 @@ const styles = StyleSheet.create({
   },
   balanceLabel: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
   },
   balanceValue: {
     fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     marginTop: 2,
   },
   syncInfo: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     paddingHorizontal: 20,
     marginTop: 8,
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textTertiary,
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -388,18 +388,18 @@ const styles = StyleSheet.create({
   },
   toggleLabel: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   toggleSubtitle: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginTop: 2,
   },
   permWarning: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.expense,
     marginTop: 10,
   },
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   testHint: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginBottom: 12,
   },
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     minHeight: 100,
     backgroundColor: Colors.surfaceSecondary,
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   },
   testBtnText: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
   testResultBox: {
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   testResultText: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     lineHeight: 20,
   },
@@ -462,7 +462,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   emptyTxn: {
@@ -472,12 +472,12 @@ const styles = StyleSheet.create({
   },
   emptyTxnText: {
     fontSize: 15,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   emptyTxnHint: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     textAlign: "center",
   },

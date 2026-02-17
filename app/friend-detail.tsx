@@ -209,7 +209,7 @@ export default function FriendDetailScreen() {
         <View style={styles.section}>
           {!showForm ? (
             <Pressable style={[styles.addEntryBtn, { backgroundColor: c.surface, borderColor: c.primary + "30" }]} onPress={() => setShowForm(true)}>
-              <Ionicons name="add-circle" size={20} color={c.primary} />
+              <Ionicons name="add-circle-outline" size={20} color={c.primary} />
               <Text style={[styles.addEntryText, { color: c.primary }]}>Add Loan Entry</Text>
             </Pressable>
           ) : (
@@ -227,7 +227,7 @@ export default function FriendDetailScreen() {
                   onPress={() => setDirection("lent")}
                 >
                   <Ionicons
-                    name="arrow-up-circle"
+                    name="arrow-up-circle-outline"
                     size={18}
                     color={direction === "lent" ? c.income : c.textTertiary}
                   />
@@ -235,7 +235,7 @@ export default function FriendDetailScreen() {
                     style={[
                       styles.directionText,
                       { color: c.textSecondary },
-                      direction === "lent" && { color: c.income, fontFamily: "Inter_600SemiBold" },
+                      direction === "lent" && { color: c.income, fontFamily: "Rubik_600SemiBold" },
                     ]}
                   >
                     I lent them
@@ -250,7 +250,7 @@ export default function FriendDetailScreen() {
                   onPress={() => setDirection("borrowed")}
                 >
                   <Ionicons
-                    name="arrow-down-circle"
+                    name="arrow-down-circle-outline"
                     size={18}
                     color={direction === "borrowed" ? c.expense : c.textTertiary}
                   />
@@ -258,7 +258,7 @@ export default function FriendDetailScreen() {
                     style={[
                       styles.directionText,
                       { color: c.textSecondary },
-                      direction === "borrowed" && { color: c.expense, fontFamily: "Inter_600SemiBold" },
+                      direction === "borrowed" && { color: c.expense, fontFamily: "Rubik_600SemiBold" },
                     ]}
                   >
                     I borrowed
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   profileCard: {
@@ -400,16 +400,16 @@ const styles = StyleSheet.create({
   },
   bigAvatarText: {
     fontSize: 30,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
   },
   profileName: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   profilePhone: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginTop: 2,
   },
@@ -424,11 +424,11 @@ const styles = StyleSheet.create({
   },
   netBadgeValue: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
   profileNote: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     marginTop: 8,
     textAlign: "center",
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 12,
   },
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   },
   addEntryText: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.primary,
   },
   formCard: {
@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
   },
   formTitle: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 16,
   },
@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   },
   directionText: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   amountRow: {
@@ -505,14 +505,14 @@ const styles = StyleSheet.create({
   },
   amountPrefix: {
     fontSize: 16,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.textSecondary,
     marginRight: 8,
   },
   amountInput: {
     flex: 1,
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     paddingVertical: 12,
   },
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
     marginBottom: 16,
   },
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   },
   cancelBtnText: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
   saveBtn: {
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
   txnList: {
@@ -580,22 +580,22 @@ const styles = StyleSheet.create({
   },
   txnDirection: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   txnReason: {
     fontSize: 12,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   txnDate: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
   },
   txnAmount: {
     fontSize: 15,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
   },
   emptyCenter: {
     flex: 1,
@@ -604,7 +604,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   emptyTxn: {
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
   },
   emptyTxnText: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
 });

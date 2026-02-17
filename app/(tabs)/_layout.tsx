@@ -62,7 +62,7 @@ function ClassicTabLayout() {
           ) : null,
         tabBarLabelStyle: {
           fontSize: 11,
-          fontFamily: "Inter_500Medium",
+          fontFamily: "Rubik_500Medium",
         },
       }}
     >
@@ -70,14 +70,18 @@ function ClassicTabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "home" : "home-outline"} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="friends"
         options={{
           title: "Friends",
-          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "people" : "people-outline"} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -90,21 +94,27 @@ function ClassicTabLayout() {
         name="analytics"
         options={{
           title: "Analytics",
-          tabBarIcon: ({ color, size }) => <Ionicons name="pie-chart" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "pie-chart" : "pie-chart-outline"} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="budget"
         options={{
           title: "Budget",
-          tabBarIcon: ({ color, size }) => <Ionicons name="wallet" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "wallet" : "wallet-outline"} size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings-sharp" size={size} color={color} />,
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "settings" : "settings-outline"} size={size} color={color} />
+          ),
         }}
       />
     </Tabs>

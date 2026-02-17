@@ -118,12 +118,12 @@ const styles = StyleSheet.create({
   },
   centerValue: {
     fontSize: 18,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   centerLabel: {
     fontSize: 11,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   legend: {
@@ -142,12 +142,12 @@ const styles = StyleSheet.create({
   legendLabel: {
     flex: 1,
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
   },
   legendPercent: {
     fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textSecondary,
   },
 });

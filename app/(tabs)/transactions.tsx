@@ -82,13 +82,13 @@ export default function TransactionsScreen() {
       <View style={styles.header}>
         <Text style={[styles.title, { color: c.text }]}>Transactions</Text>
         <Pressable onPress={() => router.push("/add-transaction")}>
-          <Ionicons name="add-circle" size={28} color={c.primary} />
+          <Ionicons name="add-circle-outline" size={28} color={c.primary} />
         </Pressable>
       </View>
 
       <View style={styles.searchRow}>
         <View style={[styles.searchBox, { backgroundColor: c.surfaceSecondary }]}>
-          <Ionicons name="search" size={18} color={c.textTertiary} />
+          <Ionicons name="search-outline" size={18} color={c.textTertiary} />
           <TextInput
             style={[styles.searchInput, { color: c.text }]}
             placeholder="Search transactions..."
@@ -98,7 +98,7 @@ export default function TransactionsScreen() {
           />
           {search.length > 0 && (
             <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color={c.textTertiary} />
+              <Ionicons name="close-circle-outline" size={18} color={c.textTertiary} />
             </Pressable>
           )}
         </View>
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 26,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
   searchRow: {
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.text,
   },
   filterRow: {
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   filterTextActive: {
@@ -217,12 +217,12 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
   emptyText: {
     fontSize: 13,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
 });

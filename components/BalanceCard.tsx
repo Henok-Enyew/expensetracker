@@ -16,7 +16,7 @@ export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps)
   const c = useColors();
   return (
     <LinearGradient
-      colors={[c.primary, c.primaryDark]}
+      colors={[c.primaryLight, c.primary, c.primaryDark]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
@@ -28,7 +28,7 @@ export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps)
         <View style={styles.metric}>
           <View style={styles.iconRow}>
             <View style={[styles.iconBg, { backgroundColor: "rgba(34, 197, 94, 0.3)" }]}>
-              <Ionicons name="arrow-down" size={14} color="#22C55E" />
+              <Ionicons name="arrow-down-outline" size={14} color="#4ADE80" />
             </View>
             <Text style={styles.metricLabel}>Income</Text>
           </View>
@@ -40,7 +40,7 @@ export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps)
         <View style={styles.metric}>
           <View style={styles.iconRow}>
             <View style={[styles.iconBg, { backgroundColor: "rgba(239, 68, 68, 0.3)" }]}>
-              <Ionicons name="arrow-up" size={14} color="#EF4444" />
+              <Ionicons name="arrow-up-outline" size={14} color="#F87171" />
             </View>
             <Text style={styles.metricLabel}>Expense</Text>
           </View>
@@ -60,13 +60,14 @@ const styles = StyleSheet.create({
   label: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_400Regular",
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
   balance: {
     color: "#FFFFFF",
     fontSize: 32,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     marginBottom: 20,
   },
   row: {
@@ -92,12 +93,12 @@ const styles = StyleSheet.create({
   metricLabel: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_400Regular",
   },
   metricValue: {
     color: "#FFFFFF",
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     marginLeft: 30,
   },
   divider: {

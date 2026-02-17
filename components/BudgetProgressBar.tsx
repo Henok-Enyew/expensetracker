@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
   },
   catName: {
     fontSize: 14,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.text,
   },
   amount: {
     fontSize: 12,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.textSecondary,
   },
   trackBg: {
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   overText: {
     fontSize: 11,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.expense,
   },
 });

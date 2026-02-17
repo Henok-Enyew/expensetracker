@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontFamily: "Inter_700Bold",
+    fontFamily: "Rubik_700Bold",
     color: Colors.text,
     marginBottom: 6,
   },
   subtitle: {
     fontSize: 15,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     marginBottom: 24,
   },
@@ -148,13 +148,13 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
     marginBottom: 8,
   },
   error: {
     fontSize: 13,
-    fontFamily: "Inter_500Medium",
+    fontFamily: "Rubik_500Medium",
     color: Colors.expense,
     marginBottom: 16,
   },
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   },
   biometricBtnText: {
     fontSize: 16,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Rubik_600SemiBold",
     color: Colors.textInverse,
   },
   loading: {
@@ -182,12 +182,12 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
   },
   hint: {
     fontSize: 14,
-    fontFamily: "Inter_400Regular",
+    fontFamily: "Rubik_400Regular",
     color: Colors.textTertiary,
     marginTop: 16,
   },
