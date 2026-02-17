@@ -12,8 +12,11 @@
     "server:prod": "NODE_ENV=production node server_dist/index.js",
     "db:push": "drizzle-kit push",
     "start": "npx expo start",
+    "start:dev": "npx expo start --dev-client",
     "lint": "npx expo lint",
-    "lint:fix": "npx expo lint --fix"
+    "lint:fix": "npx expo lint --fix",
+    "android": "NODE_BINARY=$(which node) npx expo run:android",
+    "ios": "expo run:ios"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -80,7 +83,9 @@
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
-        "exclude": ["@maniac-tech/react-native-expo-read-sms"]
+        "exclude": [
+          "@maniac-tech/react-native-expo-read-sms"
+        ]
       }
     }
   }
