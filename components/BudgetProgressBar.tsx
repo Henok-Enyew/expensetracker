@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { Category } from "@/constants/categories";
 import { formatCurrency } from "@/lib/utils";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface BudgetProgressBarProps {
@@ -12,14 +13,15 @@ interface BudgetProgressBarProps {
 }
 
 export function BudgetProgressBar({ category, spent, budget }: BudgetProgressBarProps) {
+  const c = useColors();
   const percentage = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
   const overBudget = spent > budget;
   const nearBudget = percentage >= 80 && !overBudget;
 
-  const barColor = overBudget ? Colors.expense : nearBudget ? "#F59E0B" : Colors.primary;
+  const barColor = overBudget ? c.expense : nearBudget ? "#F59E0B" : c.primary;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
       <View style={styles.header}>
         <View style={styles.catRow}>
           <View style={[styles.iconBg, { backgroundColor: category.color + "18" }]}>
@@ -29,19 +31,19 @@ export function BudgetProgressBar({ category, spent, budget }: BudgetProgressBar
               <MaterialIcons name={category.icon as any} size={18} color={category.color} />
             )}
           </View>
-          <Text style={styles.catName}>{category.name}</Text>
+          <Text style={[styles.catName, { color: c.text }]}>{category.name}</Text>
         </View>
-        <Text style={[styles.amount, overBudget && { color: Colors.expense }]}>
+        <Text style={[styles.amount, { color: c.textSecondary }, overBudget && { color: c.expense }]}>
           {formatCurrency(spent)} / {formatCurrency(budget)}
         </Text>
       </View>
 
-      <View style={styles.trackBg}>
+      <View style={[styles.trackBg, { backgroundColor: c.surfaceTertiary }]}>
         <View style={[styles.trackFill, { width: `${percentage}%`, backgroundColor: barColor }]} />
       </View>
 
       {overBudget && (
-        <Text style={styles.overText}>Over budget by {formatCurrency(spent - budget)}</Text>
+        <Text style={[styles.overText, { color: c.expense }]}>Over budget by {formatCurrency(spent - budget)}</Text>
       )}
     </View>
   );

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "@/contexts/AppContext";
+import { useColors } from "@/contexts/ThemeContext";
 import { PieChart, PieChartLegend } from "@/components/PieChart";
 import { formatCurrency, getCurrentMonth, getMonthName } from "@/lib/utils";
 import { Period } from "@/lib/types";
@@ -9,6 +10,7 @@ import Colors from "@/constants/colors";
 
 export default function AnalyticsScreen() {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   const { transactions, categories } = useApp();
   const [period, setPeriod] = useState<Period>("monthly");
   const webTopInset = Platform.OS === "web" ? 67 : 0;
@@ -66,17 +68,25 @@ export default function AnalyticsScreen() {
         : String(new Date().getFullYear());
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + webTopInset }]}>
-      <Text style={styles.title}>Analytics</Text>
+    <View style={[styles.container, { paddingTop: insets.top + webTopInset, backgroundColor: c.background }]}>
+      <Text style={[styles.title, { color: c.text }]}>Analytics</Text>
 
       <View style={styles.periodRow}>
         {periods.map((p) => (
           <Pressable
             key={p.key}
             onPress={() => setPeriod(p.key)}
-            style={[styles.periodChip, period === p.key && styles.periodChipActive]}
+            style={[
+              styles.periodChip,
+              { backgroundColor: c.surfaceSecondary },
+              period === p.key && { backgroundColor: c.primary },
+            ]}
           >
-            <Text style={[styles.periodText, period === p.key && styles.periodTextActive]}>
+            <Text style={[
+              styles.periodText,
+              { color: c.textSecondary },
+              period === p.key && { color: c.textInverse },
+            ]}>
               {p.label}
             </Text>
           </Pressable>
@@ -84,40 +94,40 @@ export default function AnalyticsScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <Text style={styles.periodLabel}>{periodLabel}</Text>
+        <Text style={[styles.periodLabel, { color: c.textSecondary }]}>{periodLabel}</Text>
 
         <View style={styles.metricsRow}>
-          <View style={[styles.metricCard, { borderLeftColor: Colors.income }]}>
-            <Text style={styles.metricLabel}>Income</Text>
-            <Text style={[styles.metricValue, { color: Colors.income }]}>
+          <View style={[styles.metricCard, { borderLeftColor: c.income, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+            <Text style={[styles.metricLabel, { color: c.textSecondary }]}>Income</Text>
+            <Text style={[styles.metricValue, { color: c.income }]}>
               {formatCurrency(periodData.income)}
             </Text>
           </View>
-          <View style={[styles.metricCard, { borderLeftColor: Colors.expense }]}>
-            <Text style={styles.metricLabel}>Expenses</Text>
-            <Text style={[styles.metricValue, { color: Colors.expense }]}>
+          <View style={[styles.metricCard, { borderLeftColor: c.expense, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+            <Text style={[styles.metricLabel, { color: c.textSecondary }]}>Expenses</Text>
+            <Text style={[styles.metricValue, { color: c.expense }]}>
               {formatCurrency(periodData.expense)}
             </Text>
           </View>
         </View>
 
-        <View style={styles.netCard}>
-          <Text style={styles.netLabel}>Net Savings</Text>
+        <View style={[styles.netCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+          <Text style={[styles.netLabel, { color: c.textSecondary }]}>Net Savings</Text>
           <Text
             style={[
               styles.netValue,
-              { color: periodData.net >= 0 ? Colors.income : Colors.expense },
+              { color: periodData.net >= 0 ? c.income : c.expense },
             ]}
           >
             {periodData.net >= 0 ? "+" : "-"}{formatCurrency(Math.abs(periodData.net))}
           </Text>
-          <Text style={styles.txnCount}>{periodData.txnCount} transactions</Text>
+          <Text style={[styles.txnCount, { color: c.textTertiary }]}>{periodData.txnCount} transactions</Text>
         </View>
 
         <View style={styles.chartSection}>
-          <Text style={styles.sectionTitle}>Spending by Category</Text>
+          <Text style={[styles.sectionTitle, { color: c.text }]}>Spending by Category</Text>
           {periodData.pieData.length > 0 ? (
-            <View style={styles.chartContainer}>
+            <View style={[styles.chartContainer, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
               <PieChart
                 data={periodData.pieData}
                 size={180}
@@ -129,24 +139,24 @@ export default function AnalyticsScreen() {
               </View>
             </View>
           ) : (
-            <View style={styles.emptyChart}>
-              <Text style={styles.emptyText}>No expense data for this period</Text>
+            <View style={[styles.emptyChart, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+              <Text style={[styles.emptyText, { color: c.textTertiary }]}>No expense data for this period</Text>
             </View>
           )}
         </View>
 
         {periodData.pieData.length > 0 && (
           <View style={styles.topSpending}>
-            <Text style={styles.sectionTitle}>Top Spending Categories</Text>
+            <Text style={[styles.sectionTitle, { color: c.text }]}>Top Spending Categories</Text>
             {periodData.pieData.slice(0, 5).map((item, idx) => (
               <View key={item.label} style={styles.barRow}>
-                <Text style={styles.barRank}>{idx + 1}</Text>
+                <Text style={[styles.barRank, { color: c.textTertiary }]}>{idx + 1}</Text>
                 <View style={styles.barInfo}>
                   <View style={styles.barLabelRow}>
-                    <Text style={styles.barLabel}>{item.label}</Text>
-                    <Text style={styles.barValue}>{formatCurrency(item.value)}</Text>
+                    <Text style={[styles.barLabel, { color: c.text }]}>{item.label}</Text>
+                    <Text style={[styles.barValue, { color: c.textSecondary }]}>{formatCurrency(item.value)}</Text>
                   </View>
-                  <View style={styles.barTrack}>
+                  <View style={[styles.barTrack, { backgroundColor: c.surfaceTertiary }]}>
                     <View
                       style={[
                         styles.barFill,

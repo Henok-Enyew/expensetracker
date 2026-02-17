@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useApp } from "@/contexts/AppContext";
+import { useColors } from "@/contexts/ThemeContext";
 import { TransactionItem } from "@/components/TransactionItem";
 import { Transaction } from "@/lib/types";
 import Colors from "@/constants/colors";
@@ -22,6 +23,7 @@ type FilterType = "all" | "expense" | "income";
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   const { transactions, categories, deleteTransaction } = useApp();
   const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
@@ -76,27 +78,27 @@ export default function TransactionsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + webTopInset }]}>
+    <View style={[styles.container, { paddingTop: insets.top + webTopInset, backgroundColor: c.background }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Transactions</Text>
+        <Text style={[styles.title, { color: c.text }]}>Transactions</Text>
         <Pressable onPress={() => router.push("/add-transaction")}>
-          <Ionicons name="add-circle" size={28} color={Colors.primary} />
+          <Ionicons name="add-circle" size={28} color={c.primary} />
         </Pressable>
       </View>
 
       <View style={styles.searchRow}>
-        <View style={styles.searchBox}>
-          <Ionicons name="search" size={18} color={Colors.textTertiary} />
+        <View style={[styles.searchBox, { backgroundColor: c.surfaceSecondary }]}>
+          <Ionicons name="search" size={18} color={c.textTertiary} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: c.text }]}
             placeholder="Search transactions..."
-            placeholderTextColor={Colors.textTertiary}
+            placeholderTextColor={c.textTertiary}
             value={search}
             onChangeText={setSearch}
           />
           {search.length > 0 && (
             <Pressable onPress={() => setSearch("")}>
-              <Ionicons name="close-circle" size={18} color={Colors.textTertiary} />
+              <Ionicons name="close-circle" size={18} color={c.textTertiary} />
             </Pressable>
           )}
         </View>
@@ -107,9 +109,17 @@ export default function TransactionsScreen() {
           <Pressable
             key={f.key}
             onPress={() => setFilter(f.key)}
-            style={[styles.filterChip, filter === f.key && styles.filterChipActive]}
+            style={[
+              styles.filterChip,
+              { backgroundColor: c.surfaceSecondary },
+              filter === f.key && { backgroundColor: c.primary },
+            ]}
           >
-            <Text style={[styles.filterText, filter === f.key && styles.filterTextActive]}>
+            <Text style={[
+              styles.filterText,
+              { color: c.textSecondary },
+              filter === f.key && { color: c.textInverse },
+            ]}>
               {f.label}
             </Text>
           </Pressable>
@@ -124,9 +134,9 @@ export default function TransactionsScreen() {
         contentContainerStyle={[styles.list, filtered.length === 0 && { flex: 1 }]}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Ionicons name="receipt-outline" size={48} color={Colors.textTertiary} />
-            <Text style={styles.emptyTitle}>No transactions found</Text>
-            <Text style={styles.emptyText}>
+            <Ionicons name="receipt-outline" size={48} color={c.textTertiary} />
+            <Text style={[styles.emptyTitle, { color: c.text }]}>No transactions found</Text>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
               {search ? "Try a different search" : "Add your first transaction"}
             </Text>
           </View>

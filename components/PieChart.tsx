@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Path, Circle } from "react-native-svg";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface PieSlice {
@@ -29,6 +30,7 @@ function createArcPath(cx: number, cy: number, r: number, startAngle: number, en
 }
 
 export function PieChart({ data, size = 180, centerLabel, centerValue }: PieChartProps) {
+  const c = useColors();
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const cx = size / 2;
   const cy = size / 2;
@@ -39,11 +41,11 @@ export function PieChart({ data, size = 180, centerLabel, centerValue }: PieChar
     return (
       <View style={[styles.container, { width: size, height: size }]}>
         <Svg width={size} height={size}>
-          <Circle cx={cx} cy={cy} r={r} fill={Colors.surfaceTertiary} />
-          <Circle cx={cx} cy={cy} r={innerR} fill={Colors.surface} />
+          <Circle cx={cx} cy={cy} r={r} fill={c.surfaceTertiary} />
+          <Circle cx={cx} cy={cy} r={innerR} fill={c.surface} />
         </Svg>
         <View style={styles.centerOverlay}>
-          <Text style={styles.centerLabel}>No Data</Text>
+          <Text style={[styles.centerLabel, { color: c.textSecondary }]}>No Data</Text>
         </View>
       </View>
     );
@@ -73,12 +75,12 @@ export function PieChart({ data, size = 180, centerLabel, centerValue }: PieChar
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size}>
         {paths}
-        <Circle cx={cx} cy={cy} r={innerR} fill={Colors.surface} />
+        <Circle cx={cx} cy={cy} r={innerR} fill={c.surface} />
       </Svg>
       {(centerLabel || centerValue) && (
         <View style={styles.centerOverlay}>
-          {centerValue && <Text style={styles.centerValue}>{centerValue}</Text>}
-          {centerLabel && <Text style={styles.centerLabel}>{centerLabel}</Text>}
+          {centerValue && <Text style={[styles.centerValue, { color: c.text }]}>{centerValue}</Text>}
+          {centerLabel && <Text style={[styles.centerLabel, { color: c.textSecondary }]}>{centerLabel}</Text>}
         </View>
       )}
     </View>
@@ -86,6 +88,7 @@ export function PieChart({ data, size = 180, centerLabel, centerValue }: PieChar
 }
 
 export function PieChartLegend({ data }: { data: PieSlice[] }) {
+  const c = useColors();
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const sorted = [...data].filter((d) => d.value > 0).sort((a, b) => b.value - a.value);
 
@@ -94,8 +97,8 @@ export function PieChartLegend({ data }: { data: PieSlice[] }) {
       {sorted.map((d) => (
         <View key={d.label} style={styles.legendItem}>
           <View style={[styles.legendDot, { backgroundColor: d.color }]} />
-          <Text style={styles.legendLabel} numberOfLines={1}>{d.label}</Text>
-          <Text style={styles.legendPercent}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</Text>
+          <Text style={[styles.legendLabel, { color: c.text }]} numberOfLines={1}>{d.label}</Text>
+          <Text style={[styles.legendPercent, { color: c.textSecondary }]}>{total > 0 ? Math.round((d.value / total) * 100) : 0}%</Text>
         </View>
       ))}
     </View>

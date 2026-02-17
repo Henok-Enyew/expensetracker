@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useApp } from "@/contexts/AppContext";
+import { useColors } from "@/contexts/ThemeContext";
 import { BANKS, BankInfo } from "@/constants/banks";
 import { generateId } from "@/lib/utils";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
@@ -22,6 +23,7 @@ import Colors from "@/constants/colors";
 
 export default function AddBankScreen() {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   const { addBankAccount } = useApp();
   const { hasPermission, isAndroid, request: requestSmsPermission } = useSmsPermission();
   const [selectedBank, setSelectedBank] = useState<BankInfo | null>(null);
@@ -66,23 +68,23 @@ export default function AddBankScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: c.background }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="close" size={24} color={Colors.text} />
+          <Ionicons name="close" size={24} color={c.text} />
         </Pressable>
-        <Text style={styles.title}>Add Bank Account</Text>
+        <Text style={[styles.title, { color: c.text }]}>Add Bank Account</Text>
         <Pressable
           onPress={handleSave}
           disabled={!selectedBank || saving}
           style={({ pressed }) => [{ opacity: selectedBank && !saving ? (pressed ? 0.7 : 1) : 0.4 }]}
         >
-          <Ionicons name="checkmark" size={24} color={Colors.primary} />
+          <Ionicons name="checkmark" size={24} color={c.primary} />
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.sectionLabel}>Select Bank</Text>
+        <Text style={[styles.sectionLabel, { color: c.text }]}>Select Bank</Text>
         <View style={styles.bankGrid}>
           {BANKS.map((bank) => {
             const isSelected = selectedBank?.id === bank.id;
@@ -90,7 +92,11 @@ export default function AddBankScreen() {
               <Pressable
                 key={bank.id}
                 onPress={() => setSelectedBank(bank)}
-                style={[styles.bankItem, isSelected && { borderColor: bank.color, backgroundColor: bank.color + "10" }]}
+                style={[
+                  styles.bankItem,
+                  { borderColor: c.border, backgroundColor: c.surface },
+                  isSelected && { borderColor: bank.color, backgroundColor: bank.color + "10" },
+                ]}
               >
                 {bank.logo ? (
                   <Image source={bank.logo} style={styles.bankLogoImage} resizeMode="contain" />
@@ -99,7 +105,7 @@ export default function AddBankScreen() {
                     <Text style={styles.bankLogoText}>{bank.iconLetter}</Text>
                   </View>
                 )}
-                <Text style={[styles.bankName, isSelected && { fontFamily: "Inter_600SemiBold" as const }]} numberOfLines={1}>
+                <Text style={[styles.bankName, { color: c.text }, isSelected && { fontFamily: "Inter_600SemiBold" as const }]} numberOfLines={1}>
                   {bank.shortName}
                 </Text>
               </Pressable>
@@ -109,22 +115,22 @@ export default function AddBankScreen() {
 
         {selectedBank && (
           <>
-            <Text style={styles.sectionLabel}>Account Name (optional)</Text>
+            <Text style={[styles.sectionLabel, { color: c.text }]}>Account Name (optional)</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: c.text, backgroundColor: c.surfaceSecondary }]}
               placeholder={`${selectedBank.shortName} Account`}
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={c.textTertiary}
               value={accountName}
               onChangeText={setAccountName}
             />
 
-            <Text style={styles.sectionLabel}>Current Balance (ETB)</Text>
-            <View style={styles.balanceRow}>
-              <Text style={styles.currencyLabel}>ETB</Text>
+            <Text style={[styles.sectionLabel, { color: c.text }]}>Current Balance (ETB)</Text>
+            <View style={[styles.balanceRow, { backgroundColor: c.surfaceSecondary }]}>
+              <Text style={[styles.currencyLabel, { color: c.textSecondary }]}>ETB</Text>
               <TextInput
-                style={styles.balanceInput}
+                style={[styles.balanceInput, { color: c.text }]}
                 placeholder="0.00"
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={c.textTertiary}
                 keyboardType="decimal-pad"
                 value={balance}
                 onChangeText={setBalance}
@@ -134,14 +140,14 @@ export default function AddBankScreen() {
             {/* SMS Sync Option */}
             {isAndroid && (
               <View style={styles.smsSection}>
-                <Text style={styles.sectionLabel}>SMS Import</Text>
-                <View style={styles.smsCard}>
+                <Text style={[styles.sectionLabel, { color: c.text }]}>SMS Import</Text>
+                <View style={[styles.smsCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
                   <View style={styles.smsRow}>
                     <View style={styles.smsInfo}>
-                      <Ionicons name="chatbubble-outline" size={20} color={Colors.primary} />
+                      <Ionicons name="chatbubble-outline" size={20} color={c.primary} />
                       <View style={{ marginLeft: 10, flex: 1 }}>
-                        <Text style={styles.smsTitle}>Enable SMS Parsing</Text>
-                        <Text style={styles.smsSubtitle}>
+                        <Text style={[styles.smsTitle, { color: c.text }]}>Enable SMS Parsing</Text>
+                        <Text style={[styles.smsSubtitle, { color: c.textSecondary }]}>
                           Auto-import transactions from {selectedBank.shortName} SMS messages to get your balance and history
                         </Text>
                       </View>
@@ -149,14 +155,14 @@ export default function AddBankScreen() {
                     <Switch
                       value={enableSmsSync}
                       onValueChange={handleToggleSmsSync}
-                      trackColor={{ false: Colors.border, true: Colors.primary + "60" }}
-                      thumbColor={enableSmsSync ? Colors.primary : Colors.surface}
+                      trackColor={{ false: c.border, true: c.primary + "60" }}
+                      thumbColor={enableSmsSync ? c.primary : c.surface}
                     />
                   </View>
                   {enableSmsSync && (
-                    <View style={styles.smsEnabledHint}>
-                      <Ionicons name="information-circle-outline" size={15} color={Colors.income} />
-                      <Text style={styles.smsHintText}>
+                    <View style={[styles.smsEnabledHint, { borderTopColor: c.borderLight }]}>
+                      <Ionicons name="information-circle-outline" size={15} color={c.income} />
+                      <Text style={[styles.smsHintText, { color: c.income }]}>
                         After adding the account, you'll be taken to the bank detail screen where you can manage sync and test SMS parsing.
                       </Text>
                     </View>
@@ -165,8 +171,8 @@ export default function AddBankScreen() {
               </View>
             )}
 
-            <Pressable style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-              <Text style={styles.saveBtnText}>
+            <Pressable style={[styles.saveBtn, { backgroundColor: c.primary }]} onPress={handleSave} disabled={saving}>
+              <Text style={[styles.saveBtnText, { color: c.textInverse }]}>
                 {saving ? "Saving..." : enableSmsSync ? "Add & Configure SMS" : "Add Account"}
               </Text>
             </Pressable>

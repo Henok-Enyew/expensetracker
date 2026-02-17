@@ -13,12 +13,14 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { useApp } from "@/contexts/AppContext";
+import { useColors } from "@/contexts/ThemeContext";
 import { CategoryPicker } from "@/components/CategoryPicker";
 import { generateId, getCurrentMonth, getMonthName } from "@/lib/utils";
 import Colors from "@/constants/colors";
 
 export default function AddBudgetScreen() {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   const { categories, budgets, saveBudgets } = useApp();
   const [categoryId, setCategoryId] = useState("");
   const [amount, setAmount] = useState("");
@@ -51,31 +53,31 @@ export default function AddBudgetScreen() {
   const canSave = parseFloat(amount) > 0 && categoryId;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: c.background }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="close" size={24} color={Colors.text} />
+          <Ionicons name="close" size={24} color={c.text} />
         </Pressable>
-        <Text style={styles.title}>Add Budget</Text>
+        <Text style={[styles.title, { color: c.text }]}>Add Budget</Text>
         <Pressable
           onPress={handleSave}
           disabled={!canSave || saving}
           style={({ pressed }) => [{ opacity: canSave && !saving ? (pressed ? 0.7 : 1) : 0.4 }]}
         >
-          <Ionicons name="checkmark" size={24} color={Colors.primary} />
+          <Ionicons name="checkmark" size={24} color={c.primary} />
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={styles.monthLabel}>{getMonthName(currentMonth)}</Text>
+        <Text style={[styles.monthLabel, { color: c.textSecondary }]}>{getMonthName(currentMonth)}</Text>
 
-        <Text style={styles.sectionLabel}>Budget Amount (ETB)</Text>
+        <Text style={[styles.sectionLabel, { color: c.text }]}>Budget Amount (ETB)</Text>
         <View style={styles.amountRow}>
-          <Text style={styles.currency}>ETB</Text>
+          <Text style={[styles.currency, { color: c.textSecondary }]}>ETB</Text>
           <TextInput
-            style={styles.amountInput}
+            style={[styles.amountInput, { color: c.text }]}
             placeholder="0.00"
-            placeholderTextColor={Colors.textTertiary}
+            placeholderTextColor={c.textTertiary}
             keyboardType="decimal-pad"
             value={amount}
             onChangeText={setAmount}
@@ -83,21 +85,21 @@ export default function AddBudgetScreen() {
           />
         </View>
 
-        <Text style={styles.sectionLabel}>Category</Text>
+        <Text style={[styles.sectionLabel, { color: c.text }]}>Category</Text>
         {availableCategories.length > 0 ? (
           <CategoryPicker categories={availableCategories} selectedId={categoryId} onSelect={setCategoryId} />
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>All categories already have budgets set</Text>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>All categories already have budgets set</Text>
           </View>
         )}
 
         <Pressable
-          style={[styles.saveBtn, !canSave && { opacity: 0.5 }]}
+          style={[styles.saveBtn, { backgroundColor: c.primary }, !canSave && { opacity: 0.5 }]}
           onPress={handleSave}
           disabled={!canSave || saving}
         >
-          <Text style={styles.saveBtnText}>{saving ? "Saving..." : "Set Budget"}</Text>
+          <Text style={[styles.saveBtnText, { color: c.textInverse }]}>{saving ? "Saving..." : "Set Budget"}</Text>
         </Pressable>
       </ScrollView>
     </View>

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { Category } from "@/constants/categories";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface CategoryPickerProps {
@@ -11,6 +12,7 @@ interface CategoryPickerProps {
 }
 
 export function CategoryPicker({ categories, selectedId, onSelect }: CategoryPickerProps) {
+  const c = useColors();
   return (
     <ScrollView contentContainerStyle={styles.grid} showsVerticalScrollIndicator={false}>
       {categories.map((cat) => {
@@ -19,7 +21,11 @@ export function CategoryPicker({ categories, selectedId, onSelect }: CategoryPic
           <Pressable
             key={cat.id}
             onPress={() => onSelect(cat.id)}
-            style={[styles.item, isSelected && { backgroundColor: cat.color + "20", borderColor: cat.color }]}
+            style={[
+              styles.item,
+              { backgroundColor: c.surface, borderColor: c.border },
+              isSelected && { backgroundColor: cat.color + "20", borderColor: cat.color },
+            ]}
           >
             <View style={[styles.iconBg, { backgroundColor: cat.color + "18" }]}>
               {cat.iconFamily === "Ionicons" ? (
@@ -28,7 +34,14 @@ export function CategoryPicker({ categories, selectedId, onSelect }: CategoryPic
                 <MaterialIcons name={cat.icon as any} size={20} color={cat.color} />
               )}
             </View>
-            <Text style={[styles.name, isSelected && { color: cat.color, fontFamily: "Inter_600SemiBold" }]} numberOfLines={1}>
+            <Text
+              style={[
+                styles.name,
+                { color: c.text },
+                isSelected && { color: cat.color, fontFamily: "Inter_600SemiBold" },
+              ]}
+              numberOfLines={1}
+            >
               {cat.name}
             </Text>
           </Pressable>

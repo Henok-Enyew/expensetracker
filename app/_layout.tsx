@@ -9,7 +9,7 @@ import { AppLockScreen } from "@/components/AppLockScreen";
 import { queryClient } from "@/lib/query-client";
 import { AppProvider } from "@/contexts/AppContext";
 import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider, useColors } from "@/contexts/ThemeContext";
 import {
   useFonts,
   Inter_400Regular,
@@ -21,8 +21,9 @@ import {
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
+  const c = useColors();
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+    <Stack screenOptions={{ headerBackTitle: "Back", contentStyle: { backgroundColor: c.background } }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="add-transaction"

@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useApp } from "@/contexts/AppContext";
+import { useColors } from "@/contexts/ThemeContext";
 import { getBankById } from "@/constants/banks";
 import { TransactionItem } from "@/components/TransactionItem";
 import { testParseSms, toggleBankSmsSync, startSmsListener } from "@/lib/sms";
@@ -25,6 +26,7 @@ import Colors from "@/constants/colors";
 
 export default function BankDetailScreen() {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     bankAccounts,
@@ -111,36 +113,36 @@ export default function BankDetailScreen() {
 
   if (!account || !bank) {
     return (
-      <View style={[styles.container, { paddingTop: insets.top }]}>
+      <View style={[styles.container, { paddingTop: insets.top, backgroundColor: c.background }]}>
         <View style={styles.header}>
           <Pressable onPress={() => router.back()} hitSlop={12}>
-            <Ionicons name="arrow-back" size={24} color={Colors.text} />
+            <Ionicons name="arrow-back" size={24} color={c.text} />
           </Pressable>
-          <Text style={styles.headerTitle}>Bank Account</Text>
+          <Text style={[styles.headerTitle, { color: c.text }]}>Bank Account</Text>
           <View style={{ width: 24 }} />
         </View>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>Account not found</Text>
+          <Text style={[styles.emptyText, { color: c.textSecondary }]}>Account not found</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: c.background }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+          <Ionicons name="arrow-back" size={24} color={c.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>{bank.shortName}</Text>
+        <Text style={[styles.headerTitle, { color: c.text }]}>{bank.shortName}</Text>
         <Pressable onPress={handleDelete} hitSlop={12}>
-          <Ionicons name="trash-outline" size={22} color={Colors.expense} />
+          <Ionicons name="trash-outline" size={22} color={c.expense} />
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Bank Info Card */}
-        <View style={[styles.bankCard, { borderLeftColor: bank.color }]}>
+        <View style={[styles.bankCard, { borderLeftColor: bank.color, backgroundColor: c.surface, borderColor: c.borderLight }]}>
           {bank.logo ? (
             <Image source={bank.logo} style={styles.bankLogoImage} resizeMode="contain" />
           ) : (
@@ -149,18 +151,18 @@ export default function BankDetailScreen() {
             </View>
           )}
           <View style={styles.bankInfo}>
-            <Text style={styles.bankName}>{bank.name}</Text>
-            <Text style={styles.accountName}>{account.accountName}</Text>
+            <Text style={[styles.bankName, { color: c.text }]}>{bank.name}</Text>
+            <Text style={[styles.accountName, { color: c.textSecondary }]}>{account.accountName}</Text>
           </View>
           <View style={styles.balanceCol}>
-            <Text style={styles.balanceLabel}>Balance</Text>
-            <Text style={styles.balanceValue}>{formatCurrency(account.balance)}</Text>
+            <Text style={[styles.balanceLabel, { color: c.textTertiary }]}>Balance</Text>
+            <Text style={[styles.balanceValue, { color: c.text }]}>{formatCurrency(account.balance)}</Text>
           </View>
         </View>
 
         {/* Sync Info */}
         {account.lastSmsSyncAt && (
-          <Text style={styles.syncInfo}>
+          <Text style={[styles.syncInfo, { color: c.textTertiary }]}>
             Last synced: {formatDate(account.lastSmsSyncAt)}
           </Text>
         )}
@@ -168,14 +170,14 @@ export default function BankDetailScreen() {
         {/* SMS Controls */}
         {isAndroid && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>SMS SYNC</Text>
-            <View style={styles.card}>
+            <Text style={[styles.sectionTitle, { color: c.textTertiary }]}>SMS SYNC</Text>
+            <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
               <View style={styles.toggleRow}>
                 <View style={styles.toggleInfo}>
-                  <Ionicons name="chatbubble-outline" size={20} color={Colors.primary} />
+                  <Ionicons name="chatbubble-outline" size={20} color={c.primary} />
                   <View style={{ marginLeft: 12, flex: 1 }}>
-                    <Text style={styles.toggleLabel}>Auto-import SMS</Text>
-                    <Text style={styles.toggleSubtitle}>
+                    <Text style={[styles.toggleLabel, { color: c.text }]}>Auto-import SMS</Text>
+                    <Text style={[styles.toggleSubtitle, { color: c.textSecondary }]}>
                       {account.smsSyncEnabled
                         ? "Listening for new bank SMS"
                         : "Tap to enable live SMS import"}
@@ -185,13 +187,13 @@ export default function BankDetailScreen() {
                 <Switch
                   value={!!account.smsSyncEnabled}
                   onValueChange={handleToggleSync}
-                  trackColor={{ false: Colors.border, true: Colors.primary + "60" }}
-                  thumbColor={account.smsSyncEnabled ? Colors.primary : Colors.surface}
+                  trackColor={{ false: c.border, true: c.primary + "60" }}
+                  thumbColor={account.smsSyncEnabled ? c.primary : c.surface}
                   disabled={!hasPermission}
                 />
               </View>
               {!hasPermission && (
-                <Text style={styles.permWarning}>
+                <Text style={[styles.permWarning, { color: c.expense }]}>
                   Grant SMS permission in Settings to enable sync.
                 </Text>
               )}
@@ -206,37 +208,37 @@ export default function BankDetailScreen() {
             onPress={() => setTestMode(!testMode)}
           >
             <View style={styles.testToggleLeft}>
-              <Ionicons name="flask-outline" size={20} color={Colors.primary} />
-              <Text style={styles.sectionTitle}>TEST SMS PARSER</Text>
+              <Ionicons name="flask-outline" size={20} color={c.primary} />
+              <Text style={[styles.sectionTitle, { color: c.textTertiary, marginBottom: 0 }]}>TEST SMS PARSER</Text>
             </View>
             <Ionicons
               name={testMode ? "chevron-up" : "chevron-down"}
               size={18}
-              color={Colors.textTertiary}
+              color={c.textTertiary}
             />
           </Pressable>
 
           {testMode && (
-            <View style={styles.card}>
-              <Text style={styles.testHint}>
+            <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+              <Text style={[styles.testHint, { color: c.textSecondary }]}>
                 Paste a bank SMS below to test if it parses correctly for {bank.shortName}.
               </Text>
               <TextInput
-                style={styles.testInput}
+                style={[styles.testInput, { borderColor: c.border, color: c.text, backgroundColor: c.surfaceSecondary }]}
                 multiline
                 numberOfLines={5}
                 placeholder="Paste SMS body here..."
-                placeholderTextColor={Colors.textTertiary}
+                placeholderTextColor={c.textTertiary}
                 value={testSmsText}
                 onChangeText={setTestSmsText}
                 textAlignVertical="top"
               />
-              <Pressable style={styles.testBtn} onPress={handleTestParse}>
-                <Text style={styles.testBtnText}>Parse SMS</Text>
+              <Pressable style={[styles.testBtn, { backgroundColor: c.primary }]} onPress={handleTestParse}>
+                <Text style={[styles.testBtnText, { color: c.textInverse }]}>Parse SMS</Text>
               </Pressable>
               {testResult && (
-                <View style={styles.testResultBox}>
-                  <Text style={styles.testResultText}>{testResult}</Text>
+                <View style={[styles.testResultBox, { backgroundColor: c.surfaceSecondary }]}>
+                  <Text style={[styles.testResultText, { color: c.text }]}>{testResult}</Text>
                 </View>
               )}
             </View>
@@ -245,21 +247,21 @@ export default function BankDetailScreen() {
 
         {/* Transactions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { color: c.textTertiary }]}>
             TRANSACTIONS ({bankTransactions.length})
           </Text>
           {bankTransactions.length === 0 ? (
             <View style={styles.emptyTxn}>
-              <Ionicons name="receipt-outline" size={36} color={Colors.textTertiary} />
-              <Text style={styles.emptyTxnText}>No transactions for this bank yet</Text>
-              <Text style={styles.emptyTxnHint}>
+              <Ionicons name="receipt-outline" size={36} color={c.textTertiary} />
+              <Text style={[styles.emptyTxnText, { color: c.text }]}>No transactions for this bank yet</Text>
+              <Text style={[styles.emptyTxnHint, { color: c.textSecondary }]}>
                 {isAndroid
                   ? "Enable SMS sync above or add transactions manually"
                   : "Add transactions manually"}
               </Text>
             </View>
           ) : (
-            <View style={styles.txnList}>
+            <View style={[styles.txnList, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
               {bankTransactions.map((txn) => (
                 <TransactionItem
                   key={txn.id}
