@@ -84,7 +84,7 @@ export function generateSmsIdSync(body: string, date: number): string {
   return `sms_${date}_${trimmed.length}_${hashCode(trimmed)}`;
 }
 
-function hashCode(str: string): number {
+export function hashCode(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const ch = str.charCodeAt(i);

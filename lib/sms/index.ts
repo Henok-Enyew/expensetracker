@@ -3,6 +3,7 @@ export {
   parseSmsAutoDetect,
   bankSmsParsers,
   generateSmsIdSync,
+  hashCode,
 } from "./parser";
 export type { ParsedBankSms, BankSmsParser } from "./parser";
 
@@ -27,3 +28,8 @@ export {
   toggleBankSmsSync,
 } from "./service";
 export type { TestParseResult } from "./service";
+
+export {
+  readAndSyncBankSms,
+} from "./inbox";
+export type { InboxSyncResult, InboxSyncProgress } from "./inbox";

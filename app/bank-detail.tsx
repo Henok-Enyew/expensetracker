@@ -7,7 +7,6 @@ import {
   ScrollView,
   Pressable,
   Switch,
-  TextInput,
   Alert,
   Platform,
   ActivityIndicator,
@@ -21,13 +20,11 @@ import { useColors } from "@/contexts/ThemeContext";
 import { getBankById } from "@/constants/banks";
 import { TransactionItem } from "@/components/TransactionItem";
 import {
-  testParseSms,
   toggleBankSmsSync,
   startSmsListener,
-  parseBankSms,
-  generateSmsIdSync,
-  syncTransactionFromSms,
+  readAndSyncBankSms,
 } from "@/lib/sms";
+import type { InboxSyncResult, InboxSyncProgress } from "@/lib/sms";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Colors from "@/constants/colors";
@@ -48,13 +45,10 @@ export default function BankDetailScreen() {
   const account = bankAccounts.find((a) => a.id === id);
   const bank = account ? getBankById(account.bankId) : undefined;
 
-  const [importMode, setImportMode] = useState(false);
-  const [importSmsText, setImportSmsText] = useState("");
-  const [importResult, setImportResult] = useState<string | null>(null);
-  const [importing, setImporting] = useState(false);
-  const [testMode, setTestMode] = useState(false);
-  const [testSmsText, setTestSmsText] = useState("");
-  const [testResult, setTestResult] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncProgress, setSyncProgress] = useState<InboxSyncProgress | null>(null);
+  const [syncResult, setSyncResult] = useState<InboxSyncResult | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   const { hasPermission, isAndroid, request: requestSmsPermission } = useSmsPermission();
 
@@ -88,94 +82,48 @@ export default function BankDetailScreen() {
     [account, refreshData, isAndroid, hasPermission, requestSmsPermission],
   );
 
-  // Import SMS as real transaction
-  const handleImportSms = useCallback(async () => {
-    if (!account || !importSmsText.trim()) {
-      setImportResult("Please paste an SMS message to import.");
-      return;
+  const handleScanSms = useCallback(async () => {
+    if (!account || !bank) return;
+
+    // Ensure we have SMS permission
+    if (isAndroid && !hasPermission) {
+      const granted = await requestSmsPermission();
+      if (!granted) {
+        Alert.alert(
+          "Permission Required",
+          "SMS read permission is needed to scan your inbox. Please grant it in Settings.",
+        );
+        return;
+      }
     }
 
-    setImporting(true);
-    setImportResult(null);
+    setSyncing(true);
+    setSyncResult(null);
+    setSyncError(null);
+    setSyncProgress({ phase: "reading" });
+
     try {
-      // Split by double newline to handle multiple SMS pasted at once
-      const smsTexts = importSmsText
-        .split(/\n{2,}/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+      const result = await readAndSyncBankSms(
+        account.bankId,
+        account.id,
+        account.lastSmsSyncAt,
+        (progress) => setSyncProgress(progress),
+      );
 
-      let imported = 0;
-      let skipped = 0;
-      let failed = 0;
-      let lastBalance: number | undefined;
-
-      for (const smsBody of smsTexts) {
-        const smsId = generateSmsIdSync(smsBody, Date.now() + imported);
-        const smsObj = { sender: account.bankId, body: smsBody, date: Date.now(), id: smsId };
-        const parsed = parseBankSms(account.bankId, smsObj);
-
-        if (!parsed) {
-          failed++;
-          continue;
-        }
-
-        const result = await syncTransactionFromSms(parsed, account.id);
-        if (result.added) {
-          imported++;
-          if (parsed.newBalance !== undefined) {
-            lastBalance = parsed.newBalance;
-          }
-        } else if (result.skippedDuplicate) {
-          skipped++;
-        } else {
-          failed++;
-        }
-      }
-
+      setSyncResult(result);
       await refreshData();
 
-      if (Platform.OS !== "web" && imported > 0) {
+      if (Platform.OS !== "web" && result.imported > 0) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
-
-      let msg = "";
-      if (imported > 0) msg += `Imported ${imported} transaction${imported > 1 ? "s" : ""}`;
-      if (skipped > 0) msg += `${msg ? "\n" : ""}Skipped ${skipped} duplicate${skipped > 1 ? "s" : ""}`;
-      if (failed > 0) msg += `${msg ? "\n" : ""}Failed to parse ${failed} message${failed > 1 ? "s" : ""}`;
-      if (lastBalance !== undefined) msg += `\nBalance updated: ETB ${lastBalance.toFixed(2)}`;
-      if (!msg) msg = "Could not parse the SMS. Check the format.";
-
-      setImportResult(msg);
-      if (imported > 0) setImportSmsText("");
     } catch (e) {
-      setImportResult(`Error: ${e instanceof Error ? e.message : "Unknown error"}`);
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      setSyncError(msg);
     } finally {
-      setImporting(false);
+      setSyncing(false);
+      setSyncProgress(null);
     }
-  }, [account, importSmsText, refreshData]);
-
-  const handleTestParse = useCallback(() => {
-    if (!account || !testSmsText.trim()) {
-      setTestResult("Please paste an SMS body to test.");
-      return;
-    }
-    const result = testParseSms(account.bankId, testSmsText.trim());
-    if (result.success && result.parsed) {
-      const p = result.parsed;
-      setTestResult(
-        `Parsed successfully!\n` +
-        `Direction: ${p.direction}\n` +
-        `Amount: ETB ${p.amount.toFixed(2)}\n` +
-        `${p.fees ? `Fees: ETB ${p.fees.toFixed(2)}\n` : ""}` +
-        `Balance: ${p.newBalance !== undefined ? `ETB ${p.newBalance.toFixed(2)}` : "N/A"}\n` +
-        `Description: ${p.description ?? "N/A"}\n` +
-        `Account: ${p.accountMask ?? "N/A"}\n` +
-        `Date: ${p.timestamp}`,
-      );
-    } else {
-      setTestResult(`Parse failed: ${result.error}`);
-    }
-  }, [account, testSmsText]);
+  }, [account, bank, refreshData, isAndroid, hasPermission, requestSmsPermission]);
 
   const handleDelete = useCallback(() => {
     if (!account) return;
@@ -212,6 +160,14 @@ export default function BankDetailScreen() {
       </View>
     );
   }
+
+  const progressText = syncProgress
+    ? syncProgress.phase === "reading"
+      ? "Reading SMS inbox..."
+      : syncProgress.phase === "parsing"
+        ? `Scanning messages${syncProgress.total ? ` (${syncProgress.current ?? 0}/${syncProgress.total})` : ""}...`
+        : ""
+    : "";
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, backgroundColor: c.background }]}>
@@ -252,7 +208,7 @@ export default function BankDetailScreen() {
           </Text>
         )}
 
-        {/* SMS Controls */}
+        {/* SMS Auto-Import Toggle (Android only) */}
         {isAndroid && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: c.textTertiary }]}>SMS SYNC</Text>
@@ -293,114 +249,112 @@ export default function BankDetailScreen() {
           </View>
         )}
 
-        {/* Import SMS Section */}
-        <View style={styles.section}>
-          <Pressable
-            style={styles.sectionToggle}
-            onPress={() => { setImportMode(!importMode); setImportResult(null); }}
-          >
-            <View style={styles.sectionToggleLeft}>
-              <Ionicons name="download-outline" size={20} color={c.primary} />
-              <Text style={[styles.sectionTitle, { color: c.text, marginBottom: 0 }]}>IMPORT SMS</Text>
-            </View>
-            <Ionicons
-              name={importMode ? "chevron-up" : "chevron-down"}
-              size={18}
-              color={c.textTertiary}
-            />
-          </Pressable>
-
-          {importMode && (
-            <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.borderLight, marginTop: 10 }]}>
-              <Text style={[styles.importHint, { color: c.textSecondary }]}>
-                Paste a bank SMS message below to import it as a transaction. You can paste multiple messages separated by a blank line.
-              </Text>
-              <TextInput
-                style={[styles.smsInput, { borderColor: c.border, color: c.text, backgroundColor: c.surfaceSecondary }]}
-                multiline
-                numberOfLines={6}
-                placeholder={`Paste your ${bank.shortName} SMS here...\n\nExample:\nDear Henok your Account 1*****7365 has been Credited with ETB 500.00 from Atsede Desalegn, on 16/02/2026 at 20:39:29 with Ref No FT26048VF0ST Your Current Balance is ETB 1,149.83.`}
-                placeholderTextColor={c.textTertiary}
-                value={importSmsText}
-                onChangeText={setImportSmsText}
-                textAlignVertical="top"
-              />
-              <Pressable
-                style={[styles.importBtn, { backgroundColor: c.primary }, importing && { opacity: 0.6 }]}
-                onPress={handleImportSms}
-                disabled={importing || !importSmsText.trim()}
-              >
-                {importing ? (
-                  <ActivityIndicator size="small" color={c.textInverse} />
-                ) : (
-                  <>
-                    <Ionicons name="download-outline" size={18} color={c.textInverse} />
-                    <Text style={[styles.importBtnText, { color: c.textInverse }]}>Import as Transaction</Text>
-                  </>
-                )}
-              </Pressable>
-              {importResult && (
-                <View style={[
-                  styles.resultBox,
-                  { backgroundColor: importResult.includes("Imported") ? c.income + "15" : c.surfaceSecondary },
-                ]}>
-                  <Ionicons
-                    name={importResult.includes("Imported") ? "checkmark-circle-outline" : "information-circle-outline"}
-                    size={18}
-                    color={importResult.includes("Imported") ? c.income : c.textSecondary}
-                  />
-                  <Text style={[styles.resultText, { color: importResult.includes("Imported") ? c.income : c.text }]}>
-                    {importResult}
+        {/* Scan & Import SMS from Inbox */}
+        {isAndroid && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: c.textTertiary }]}>IMPORT SMS</Text>
+            <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+              <View style={styles.scanHeader}>
+                <View style={[styles.scanIconBg, { backgroundColor: c.primary + "15" }]}>
+                  <Ionicons name="phone-portrait-outline" size={22} color={c.primary} />
+                </View>
+                <View style={styles.scanHeaderText}>
+                  <Text style={[styles.scanTitle, { color: c.text }]}>
+                    Scan Device SMS
+                  </Text>
+                  <Text style={[styles.scanSubtitle, { color: c.textSecondary }]}>
+                    Reads your inbox and imports {bank.shortName} transactions automatically
                   </Text>
                 </View>
-              )}
-            </View>
-          )}
-        </View>
+              </View>
 
-        {/* Test SMS Parser (debug) */}
-        <View style={styles.section}>
-          <Pressable
-            style={styles.sectionToggle}
-            onPress={() => setTestMode(!testMode)}
-          >
-            <View style={styles.sectionToggleLeft}>
-              <Ionicons name="flask-outline" size={20} color={c.textTertiary} />
-              <Text style={[styles.sectionTitle, { color: c.textTertiary, marginBottom: 0 }]}>TEST PARSER</Text>
-            </View>
-            <Ionicons
-              name={testMode ? "chevron-up" : "chevron-down"}
-              size={18}
-              color={c.textTertiary}
-            />
-          </Pressable>
-
-          {testMode && (
-            <View style={[styles.card, { backgroundColor: c.surface, borderColor: c.borderLight, marginTop: 10 }]}>
-              <Text style={[styles.importHint, { color: c.textSecondary }]}>
-                Test if an SMS parses correctly for {bank.shortName}. This does NOT import — it only shows the parsed result.
-              </Text>
-              <TextInput
-                style={[styles.smsInput, { borderColor: c.border, color: c.text, backgroundColor: c.surfaceSecondary }]}
-                multiline
-                numberOfLines={4}
-                placeholder="Paste SMS body here..."
-                placeholderTextColor={c.textTertiary}
-                value={testSmsText}
-                onChangeText={setTestSmsText}
-                textAlignVertical="top"
-              />
-              <Pressable style={[styles.testBtn, { backgroundColor: c.surfaceTertiary }]} onPress={handleTestParse}>
-                <Text style={[styles.testBtnText, { color: c.text }]}>Test Parse</Text>
+              <Pressable
+                style={[
+                  styles.scanBtn,
+                  { backgroundColor: c.primary },
+                  syncing && { opacity: 0.7 },
+                ]}
+                onPress={handleScanSms}
+                disabled={syncing}
+              >
+                {syncing ? (
+                  <View style={styles.scanBtnContent}>
+                    <ActivityIndicator size="small" color={c.textInverse} />
+                    <Text style={[styles.scanBtnText, { color: c.textInverse }]}>
+                      {progressText || "Scanning..."}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.scanBtnContent}>
+                    <Ionicons name="scan-outline" size={20} color={c.textInverse} />
+                    <Text style={[styles.scanBtnText, { color: c.textInverse }]}>
+                      Scan & Import
+                    </Text>
+                  </View>
+                )}
               </Pressable>
-              {testResult && (
-                <View style={[styles.resultBox, { backgroundColor: c.surfaceSecondary }]}>
-                  <Text style={[styles.resultText, { color: c.text }]}>{testResult}</Text>
+
+              {/* Sync Result */}
+              {syncResult && !syncing && (
+                <View
+                  style={[
+                    styles.resultCard,
+                    {
+                      backgroundColor:
+                        syncResult.imported > 0 ? c.income + "12" : c.surfaceSecondary,
+                      borderColor:
+                        syncResult.imported > 0 ? c.income + "30" : c.borderLight,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={syncResult.imported > 0 ? "checkmark-circle" : "information-circle-outline"}
+                    size={22}
+                    color={syncResult.imported > 0 ? c.income : c.textSecondary}
+                  />
+                  <View style={styles.resultContent}>
+                    {syncResult.imported > 0 && (
+                      <Text style={[styles.resultLine, { color: c.income, fontFamily: "Rubik_600SemiBold" }]}>
+                        Imported {syncResult.imported} transaction{syncResult.imported > 1 ? "s" : ""}
+                      </Text>
+                    )}
+                    {syncResult.skipped > 0 && (
+                      <Text style={[styles.resultLine, { color: c.textSecondary }]}>
+                        {syncResult.skipped} already imported (skipped)
+                      </Text>
+                    )}
+                    {syncResult.imported === 0 && syncResult.skipped === 0 && (
+                      <Text style={[styles.resultLine, { color: c.textSecondary }]}>
+                        No new {bank.shortName} transactions found in SMS
+                      </Text>
+                    )}
+                    {syncResult.lastBalance !== undefined && (
+                      <Text style={[styles.resultLine, { color: c.text, fontFamily: "Rubik_600SemiBold" }]}>
+                        Balance updated: {formatCurrency(syncResult.lastBalance)}
+                      </Text>
+                    )}
+                    <Text style={[styles.resultMeta, { color: c.textTertiary }]}>
+                      Scanned {syncResult.totalRead} SMS
+                      {syncResult.totalBankSms > 0
+                        ? ` — found ${syncResult.totalBankSms} from ${bank.shortName}`
+                        : ""}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Error */}
+              {syncError && !syncing && (
+                <View style={[styles.resultCard, { backgroundColor: c.expense + "12", borderColor: c.expense + "30" }]}>
+                  <Ionicons name="alert-circle-outline" size={22} color={c.expense} />
+                  <View style={styles.resultContent}>
+                    <Text style={[styles.resultLine, { color: c.expense }]}>{syncError}</Text>
+                  </View>
                 </View>
               )}
             </View>
-          )}
-        </View>
+          </View>
+        )}
 
         {/* Transactions */}
         <View style={styles.section}>
@@ -413,8 +367,8 @@ export default function BankDetailScreen() {
               <Text style={[styles.emptyTxnText, { color: c.text }]}>No transactions for this bank yet</Text>
               <Text style={[styles.emptyTxnHint, { color: c.textSecondary }]}>
                 {isAndroid
-                  ? "Enable SMS sync or import SMS above to get started"
-                  : "Import SMS above to get started"}
+                  ? 'Tap "Scan & Import" above to read your SMS and import transactions'
+                  : "SMS import is only available on Android devices"}
               </Text>
             </View>
           ) : (
@@ -523,16 +477,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 10,
   },
-  sectionToggle: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  sectionToggleLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
   card: {
     backgroundColor: Colors.surface,
     borderRadius: 14,
@@ -584,63 +528,72 @@ const styles = StyleSheet.create({
     color: Colors.expense,
     marginTop: 10,
   },
-  importHint: {
-    fontSize: 13,
+  scanHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    marginBottom: 16,
+  },
+  scanIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scanHeaderText: {
+    flex: 1,
+  },
+  scanTitle: {
+    fontSize: 15,
+    fontFamily: "Rubik_600SemiBold",
+    color: Colors.text,
+  },
+  scanSubtitle: {
+    fontSize: 12,
     fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
-    marginBottom: 12,
-    lineHeight: 18,
+    marginTop: 3,
+    lineHeight: 17,
   },
-  smsInput: {
-    borderWidth: 1,
-    borderColor: Colors.border,
+  scanBtn: {
     borderRadius: 12,
-    padding: 12,
-    fontSize: 14,
-    fontFamily: "Rubik_400Regular",
-    color: Colors.text,
-    minHeight: 120,
-    backgroundColor: Colors.surfaceSecondary,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  importBtn: {
+  scanBtnContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 10,
-    paddingVertical: 14,
-    marginTop: 12,
+    gap: 10,
   },
-  importBtnText: {
+  scanBtnText: {
     fontSize: 15,
     fontFamily: "Rubik_600SemiBold",
-    color: Colors.textInverse,
   },
-  testBtn: {
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginTop: 12,
-  },
-  testBtnText: {
-    fontSize: 14,
-    fontFamily: "Rubik_500Medium",
-  },
-  resultBox: {
+  resultCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 8,
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 12,
+    gap: 12,
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 14,
+    borderWidth: 1,
   },
-  resultText: {
+  resultContent: {
     flex: 1,
+    gap: 3,
+  },
+  resultLine: {
     fontSize: 13,
     fontFamily: "Rubik_400Regular",
-    color: Colors.text,
-    lineHeight: 20,
+    lineHeight: 19,
+  },
+  resultMeta: {
+    fontSize: 11,
+    fontFamily: "Rubik_400Regular",
+    marginTop: 4,
   },
   emptyState: {
     flex: 1,
