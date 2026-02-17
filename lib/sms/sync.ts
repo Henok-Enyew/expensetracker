@@ -15,10 +15,13 @@ export interface SyncResult {
 
 /**
  * Sync a parsed SMS into a transaction. Handles dedup, fee creation, and balance update.
+ * When skipBalanceUpdate is true, the caller is responsible for setting the final balance
+ * (used during batch imports so only the most recent SMS balance is applied).
  */
 export async function syncTransactionFromSms(
   parsed: ParsedBankSms,
   bankAccountId: string | null,
+  options?: { skipBalanceUpdate?: boolean },
 ): Promise<SyncResult> {
   // Fast dedup via processed SMS IDs
   const isDuplicate = await storage.isSmsDuplicate(parsed.smsId);
@@ -78,7 +81,8 @@ export async function syncTransactionFromSms(
   }
 
   // Update bank account balance if we have a newBalance
-  if (bankAccountId && parsed.newBalance !== undefined) {
+  // During batch imports, this is skipped — the caller sets balance from the most recent SMS
+  if (!options?.skipBalanceUpdate && bankAccountId && parsed.newBalance !== undefined) {
     const accounts = await storage.getBankAccounts();
     const account = accounts.find((a) => a.id === bankAccountId);
     if (account) {
@@ -118,6 +122,8 @@ export function findBankAccountForParsed(
 
 /**
  * Batch sync multiple parsed SMS messages.
+ * Messages should be sorted by date ascending (oldest first) so the
+ * final newBalance is from the most recent SMS.
  */
 export async function syncBatchFromSms(
   parsedMessages: ParsedBankSms[],
@@ -127,15 +133,36 @@ export async function syncBatchFromSms(
   let skipped = 0;
   let latestBalance: number | undefined;
 
-  for (const parsed of parsedMessages) {
-    const result = await syncTransactionFromSms(parsed, bankAccountId);
+  // Sort by timestamp ascending so the most recent SMS is processed last
+  const sorted = [...parsedMessages].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+  );
+
+  for (const parsed of sorted) {
+    // Skip per-SMS balance updates; set balance once at the end
+    const result = await syncTransactionFromSms(parsed, bankAccountId, { skipBalanceUpdate: true });
     if (result.added) {
       imported++;
-      if (parsed.newBalance !== undefined) {
-        latestBalance = parsed.newBalance;
-      }
     } else {
       skipped++;
+    }
+    // Track latest balance (last one wins since sorted oldest→newest)
+    if (parsed.newBalance !== undefined) {
+      latestBalance = parsed.newBalance;
+    }
+  }
+
+  // Set final balance from most recent SMS
+  if (bankAccountId && latestBalance !== undefined) {
+    const accounts = await storage.getBankAccounts();
+    const account = accounts.find((a) => a.id === bankAccountId);
+    if (account) {
+      await storage.updateBankAccount({
+        ...account,
+        balance: latestBalance,
+        lastUpdated: new Date().toISOString(),
+        lastSmsSyncAt: new Date().toISOString(),
+      });
     }
   }
 

@@ -74,12 +74,16 @@ export async function readAndSyncBankSms(
     : Date.now() - NINETY_DAYS_MS;
 
   // Step 1: Read SMS from device inbox
-  const allMessages = await readSmsInbox(1500, since);
+  const rawMessages = await readSmsInbox(1500, since);
 
-  if (allMessages.length === 0) {
+  if (rawMessages.length === 0) {
     onProgress?.({ phase: "done" });
     return { imported: 0, skipped: 0, failed: 0, totalRead: 0, totalBankSms: 0 };
   }
+
+  // Sort by date ascending (oldest first) so the most recent SMS is processed
+  // last — its newBalance becomes the final bank balance.
+  const allMessages = [...rawMessages].sort((a, b) => a.date - b.date);
 
   // Step 2: Build a set of body hashes from existing SMS-imported transactions
   //         This provides cross-method dedup (catches duplicates even if
@@ -147,17 +151,22 @@ export async function readAndSyncBankSms(
       continue;
     }
 
-    const result = await syncTransactionFromSms(parsed, bankAccountId);
+    // Skip per-SMS balance updates; we set the balance once at the end
+    // from the most recent SMS (messages are sorted oldest→newest)
+    const result = await syncTransactionFromSms(parsed, bankAccountId, { skipBalanceUpdate: true });
     if (result.added) {
       imported++;
       existingBodyHashes.add(bodyHash);
-      if (parsed.newBalance !== undefined) {
-        lastBalance = parsed.newBalance;
-      }
     } else if (result.skippedDuplicate) {
       skipped++;
     } else {
       failed++;
+    }
+
+    // Always track the latest balance — since sorted oldest→newest,
+    // the last one with a newBalance is from the most recent SMS
+    if (parsed.newBalance !== undefined) {
+      lastBalance = parsed.newBalance;
     }
 
     // Throttle progress updates
@@ -166,17 +175,20 @@ export async function readAndSyncBankSms(
     }
   }
 
-  // Step 4: Update last sync time
-  if (imported > 0 || bankSmsCount > 0) {
-    const accounts = await storage.getBankAccounts();
-    const account = accounts.find((a) => a.id === bankAccountId);
-    if (account) {
-      await storage.updateBankAccount({
-        ...account,
-        lastSmsSyncAt: new Date().toISOString(),
-        ...(lastBalance !== undefined ? { balance: lastBalance } : {}),
-      });
+  // Step 4: Update bank balance from the most recent SMS and record sync time.
+  // Since messages are sorted oldest→newest, lastBalance is from the most recent
+  // SMS that had a newBalance — this is the bank's actual current balance.
+  const accounts = await storage.getBankAccounts();
+  const account = accounts.find((a) => a.id === bankAccountId);
+  if (account) {
+    const updates: Record<string, any> = {
+      ...account,
+      lastSmsSyncAt: new Date().toISOString(),
+    };
+    if (lastBalance !== undefined) {
+      updates.balance = lastBalance;
     }
+    await storage.updateBankAccount(updates as typeof account);
   }
 
   onProgress?.({ phase: "done" });
