@@ -116,18 +116,21 @@ export default function HomeScreen() {
         {/* Friends / Loans Net */}
         {friends.length > 0 && friendsNet.netWithFriends !== 0 && (
           <Pressable
-            style={[styles.friendsCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}
+            style={[styles.friendsCard, {
+              backgroundColor: (friendsNet.netWithFriends > 0 ? c.income : c.expense) + "10",
+              borderColor: (friendsNet.netWithFriends > 0 ? c.income : c.expense) + "25",
+            }]}
             onPress={() => router.push("/(tabs)/friends")}
           >
             <View style={styles.friendsCardLeft}>
-              <Ionicons name="people-outline" size={18} color={c.primary} />
+              <Ionicons name="people-outline" size={18} color={friendsNet.netWithFriends > 0 ? c.income : c.expense} />
               <Text style={[styles.friendsCardLabel, { color: c.text }]}>Net with friends</Text>
             </View>
             <Text
               style={[
                 styles.friendsCardValue,
                 {
-                  color: friendsNet.netWithFriends > 0 ? Colors.income : Colors.expense,
+                  color: friendsNet.netWithFriends > 0 ? c.income : c.expense,
                 },
               ]}
             >

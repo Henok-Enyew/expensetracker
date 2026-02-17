@@ -142,7 +142,7 @@ export default function BankDetailScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Bank Info Card */}
-        <View style={[styles.bankCard, { borderLeftColor: bank.color, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+        <View style={[styles.bankCard, { backgroundColor: bank.color + "10", borderColor: bank.color + "25" }]}>
           {bank.logo ? (
             <Image source={bank.logo} style={styles.bankLogoImage} resizeMode="contain" />
           ) : (
@@ -298,12 +298,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 20,
-    backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 16,
-    borderLeftWidth: 4,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
     gap: 14,
   },
   bankLogoImage: {

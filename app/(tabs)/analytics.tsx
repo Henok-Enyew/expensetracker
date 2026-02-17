@@ -97,13 +97,13 @@ export default function AnalyticsScreen() {
         <Text style={[styles.periodLabel, { color: c.textSecondary }]}>{periodLabel}</Text>
 
         <View style={styles.metricsRow}>
-          <View style={[styles.metricCard, { borderLeftColor: c.income, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+          <View style={[styles.metricCard, { backgroundColor: c.income + "10", borderColor: c.income + "25" }]}>
             <Text style={[styles.metricLabel, { color: c.textSecondary }]}>Income</Text>
             <Text style={[styles.metricValue, { color: c.income }]}>
               {formatCurrency(periodData.income)}
             </Text>
           </View>
-          <View style={[styles.metricCard, { borderLeftColor: c.expense, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+          <View style={[styles.metricCard, { backgroundColor: c.expense + "10", borderColor: c.expense + "25" }]}>
             <Text style={[styles.metricLabel, { color: c.textSecondary }]}>Expenses</Text>
             <Text style={[styles.metricValue, { color: c.expense }]}>
               {formatCurrency(periodData.expense)}
@@ -111,7 +111,10 @@ export default function AnalyticsScreen() {
           </View>
         </View>
 
-        <View style={[styles.netCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+        <View style={[styles.netCard, {
+          backgroundColor: (periodData.net >= 0 ? c.income : c.expense) + "10",
+          borderColor: (periodData.net >= 0 ? c.income : c.expense) + "25",
+        }]}>
           <Text style={[styles.netLabel, { color: c.textSecondary }]}>Net Savings</Text>
           <Text
             style={[
@@ -228,13 +231,10 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     flex: 1,
-    backgroundColor: Colors.surface,
     borderRadius: 14,
     padding: 16,
-    borderLeftWidth: 3,
     gap: 4,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
   },
   metricLabel: {
     fontSize: 12,

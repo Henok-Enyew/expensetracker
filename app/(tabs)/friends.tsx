@@ -58,13 +58,13 @@ export default function FriendsScreen() {
       >
         {/* Summary Cards */}
         <View style={styles.summaryRow}>
-          <View style={[styles.summaryCard, { borderLeftColor: c.income, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+          <View style={[styles.summaryCard, { backgroundColor: c.income + "10", borderColor: c.income + "25" }]}>
             <Text style={[styles.summaryLabel, { color: c.textSecondary }]}>Owed to you</Text>
             <Text style={[styles.summaryValue, { color: c.income }]}>
               {formatCurrency(friendsNet.totalOwedToMe)}
             </Text>
           </View>
-          <View style={[styles.summaryCard, { borderLeftColor: c.expense, backgroundColor: c.surface, borderColor: c.borderLight }]}>
+          <View style={[styles.summaryCard, { backgroundColor: c.expense + "10", borderColor: c.expense + "25" }]}>
             <Text style={[styles.summaryLabel, { color: c.textSecondary }]}>You owe</Text>
             <Text style={[styles.summaryValue, { color: c.expense }]}>
               {formatCurrency(friendsNet.totalIOwe)}
@@ -73,7 +73,14 @@ export default function FriendsScreen() {
         </View>
 
         {/* Net Card */}
-        <View style={[styles.netCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+        <View style={[styles.netCard, {
+          backgroundColor: friendsNet.netWithFriends !== 0
+            ? (friendsNet.netWithFriends > 0 ? c.income : c.expense) + "10"
+            : c.surface,
+          borderColor: friendsNet.netWithFriends !== 0
+            ? (friendsNet.netWithFriends > 0 ? c.income : c.expense) + "25"
+            : c.borderLight,
+        }]}>
           <Text style={[styles.netLabel, { color: c.textSecondary }]}>Net with friends</Text>
           <Text
             style={[
@@ -232,12 +239,9 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: Colors.surface,
     borderRadius: 14,
     padding: 16,
-    borderLeftWidth: 3,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
   },
   summaryLabel: {
     fontSize: 12,
