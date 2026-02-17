@@ -8,6 +8,7 @@ const KEYS = {
   BUDGETS: "@birr_budgets",
   CATEGORIES: "@birr_categories",
   CASH_BALANCE: "@birr_cash_balance",
+  PROCESSED_SMS_IDS: "@birr_processed_sms_ids",
 };
 
 async function getItem<T>(key: string, fallback: T): Promise<T> {
@@ -112,6 +113,38 @@ export async function getCashBalance(): Promise<number> {
 
 export async function setCashBalance(balance: number): Promise<void> {
   await setItem(KEYS.CASH_BALANCE, balance);
+}
+
+export async function getProcessedSmsIds(): Promise<Set<string>> {
+  const arr = await getItem<string[]>(KEYS.PROCESSED_SMS_IDS, []);
+  return new Set(arr);
+}
+
+export async function addProcessedSmsId(smsId: string): Promise<void> {
+  const arr = await getItem<string[]>(KEYS.PROCESSED_SMS_IDS, []);
+  if (!arr.includes(smsId)) {
+    arr.push(smsId);
+    await setItem(KEYS.PROCESSED_SMS_IDS, arr);
+  }
+}
+
+export async function addProcessedSmsIds(ids: string[]): Promise<void> {
+  const arr = await getItem<string[]>(KEYS.PROCESSED_SMS_IDS, []);
+  const existing = new Set(arr);
+  let changed = false;
+  for (const id of ids) {
+    if (!existing.has(id)) {
+      arr.push(id);
+      existing.add(id);
+      changed = true;
+    }
+  }
+  if (changed) await setItem(KEYS.PROCESSED_SMS_IDS, arr);
+}
+
+export async function isSmsDuplicate(smsId: string): Promise<boolean> {
+  const ids = await getProcessedSmsIds();
+  return ids.has(smsId);
 }
 
 export async function exportTransactionsCSV(txns: Transaction[], categories: Category[]): Promise<string> {

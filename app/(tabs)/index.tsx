@@ -89,7 +89,11 @@ export default function HomeScreen() {
                 <Text style={styles.cashBalance}>ETB {cashBalance.toLocaleString()}</Text>
               </Pressable>
               {bankAccounts.map((acc) => (
-                <BankAccountCard key={acc.id} account={acc} />
+                <BankAccountCard
+                  key={acc.id}
+                  account={acc}
+                  onPress={() => router.push({ pathname: "/bank-detail", params: { id: acc.id } })}
+                />
               ))}
             </ScrollView>
           </View>

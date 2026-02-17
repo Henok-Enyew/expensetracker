@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { BankAccount } from "@/lib/types";
 import { getBankById } from "@/constants/banks";
 import { formatCurrencyShort } from "@/lib/utils";
@@ -19,9 +20,18 @@ export function BankAccountCard({ account, onPress }: BankAccountCardProps) {
       onPress={onPress}
       style={({ pressed }) => [styles.container, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
     >
-      <View style={[styles.logo, { backgroundColor: bank.color }]}>
-        <Text style={styles.logoText}>{bank.iconLetter}</Text>
-      </View>
+      {account.smsSyncEnabled && (
+        <View style={styles.syncBadge}>
+          <Ionicons name="sync-circle" size={14} color={Colors.primary} />
+        </View>
+      )}
+      {bank.logo ? (
+        <Image source={bank.logo} style={styles.logoImage} resizeMode="contain" />
+      ) : (
+        <View style={[styles.logo, { backgroundColor: bank.color }]}>
+          <Text style={styles.logoText}>{bank.iconLetter}</Text>
+        </View>
+      )}
       <Text style={styles.bankName} numberOfLines={1}>{bank.shortName}</Text>
       <Text style={styles.balance}>{formatCurrencyShort(account.balance)}</Text>
     </Pressable>
@@ -43,6 +53,17 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 1,
     borderColor: Colors.borderLight,
+    position: "relative",
+  },
+  syncBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+  },
+  logoImage: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
   },
   logo: {
     width: 42,

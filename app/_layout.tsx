@@ -44,6 +44,10 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="bank-detail"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }

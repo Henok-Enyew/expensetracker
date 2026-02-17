@@ -1,4 +1,29 @@
-export { parseBankSms, parseSmsFromSender } from "./parser";
-export type { ParsedSms } from "./parser";
-export { syncTransactionFromSms, findBankAccountForParsed } from "./sync";
-export { setSmsImportedCallback, startSmsListener, stopSmsListener } from "./listener";
+export {
+  parseBankSms,
+  parseSmsAutoDetect,
+  bankSmsParsers,
+  generateSmsIdSync,
+} from "./parser";
+export type { ParsedBankSms, BankSmsParser } from "./parser";
+
+export {
+  syncTransactionFromSms,
+  findBankAccountForParsed,
+  syncBatchFromSms,
+} from "./sync";
+export type { SyncResult } from "./sync";
+
+export {
+  setSmsImportedCallback,
+  startSmsListener,
+  stopSmsListener,
+} from "./listener";
+
+export {
+  testParseSms,
+  autoDetectParseSms,
+  processIncomingSms,
+  getSyncEnabledBanks,
+  toggleBankSmsSync,
+} from "./service";
+export type { TestParseResult } from "./service";

@@ -19,7 +19,7 @@ import { useApp } from "@/contexts/AppContext";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
 import { exportTransactionsCSV } from "@/lib/storage";
-import { setSmsImportedCallback, startSmsListener } from "@/lib/sms";
+import { setSmsImportedCallback } from "@/lib/sms";
 import Colors from "@/constants/colors";
 
 interface SettingItemProps {
@@ -63,7 +63,6 @@ export default function SettingsScreen() {
     request: requestSmsPermission,
     openAppSettings,
   } = useSmsPermission();
-  const [smsListening, setSmsListening] = useState(false);
   const [smsError, setSmsError] = useState<string | null>(null);
   const {
     appLockEnabled,
@@ -97,16 +96,6 @@ export default function SettingsScreen() {
         "Open Settings to grant SMS permission for bank transaction import.",
         [{ text: "Cancel", style: "cancel" }, { text: "Open Settings", onPress: openAppSettings }],
       );
-    }
-  };
-
-  const handleStartSmsListening = async () => {
-    setSmsError(null);
-    const result = await startSmsListener();
-    if (result.started) {
-      setSmsListening(true);
-    } else {
-      setSmsError(result.error ?? "Failed to start");
     }
   };
 
@@ -272,46 +261,23 @@ export default function SettingsScreen() {
                   <Ionicons name="chatbubble-outline" size={20} color={Colors.primary} />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingLabel}>Enable SMS import</Text>
+                  <Text style={styles.settingLabel}>SMS Permission</Text>
                   <Text style={styles.settingSubtitle}>
                     {smsChecking
                       ? "Checking…"
                       : smsPermission
-                        ? "Permission granted"
+                        ? "Permission granted — manage SMS sync per bank"
                         : "Grant permission to read bank SMS"}
                   </Text>
                 </View>
                 {smsPermission && <Ionicons name="checkmark-circle" size={22} color={Colors.income} />}
               </Pressable>
-              <Pressable
-                style={styles.settingItem}
-                onPress={handleStartSmsListening}
-                disabled={!smsPermission || smsListening}
-              >
-                <View style={[styles.settingIcon, { backgroundColor: Colors.primary + "15" }]}>
-                  <Ionicons name="phone-portrait-outline" size={20} color={Colors.primary} />
-                </View>
-                <View style={styles.settingContent}>
-                  <Text style={styles.settingLabel}>Listen for new bank SMS</Text>
-                  <Text style={styles.settingSubtitle}>
-                    {smsListening
-                      ? "Listening… new bank SMS will be imported automatically"
-                      : "Start listening for incoming bank messages"}
-                  </Text>
-                </View>
-              </Pressable>
-              <SettingItem
-                icon="document-text-outline"
-                label="Scan past bank SMS"
-                subtitle="Import from existing bank messages"
-                onPress={() =>
-                  Alert.alert(
-                    "Historical scan",
-                    "Reading past SMS requires a development build (npx expo run:android). Use 'Listen for new bank SMS' to import new messages automatically.",
-                    [{ text: "OK" }],
-                  )
-                }
-              />
+              <View style={styles.smsHintWrap}>
+                <Ionicons name="information-circle-outline" size={16} color={Colors.textTertiary} />
+                <Text style={styles.smsHintText}>
+                  Tap a bank account on the Home screen to configure SMS sync for each bank individually.
+                </Text>
+              </View>
               {smsError ? (
                 <View style={styles.smsErrorWrap}>
                   <Text style={styles.smsError}>{smsError}</Text>
@@ -592,6 +558,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: Colors.textInverse,
+  },
+  smsHintWrap: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+  },
+  smsHintText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: Colors.textTertiary,
+    lineHeight: 18,
   },
   smsErrorWrap: {
     paddingHorizontal: 16,

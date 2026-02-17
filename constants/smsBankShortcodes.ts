@@ -1,38 +1,86 @@
 /**
- * Ethiopian bank SMS sender IDs / shortcodes for filtering bank messages.
- * Format varies by carrier; common patterns are shortcodes (e.g. 8990) or alphanumeric senders.
- * Add or adjust based on real SMS from each bank.
+ * Ethiopian bank SMS sender IDs / shortcodes.
+ *
+ * Many banks share the common shortcode "8990", so the sender alone
+ * is NOT enough to identify the bank. The parsers in lib/sms/parser.ts
+ * determine the actual bank from the SMS body content.
+ *
+ * These mappings are used to:
+ * 1. Identify SMS that are *potentially* bank-related (for the listener)
+ * 2. Provide a first guess for which parser to try
  */
+
 export const BANK_SMS_SENDERS: Record<string, string[]> = {
-  cbe: ["8990", "CBE", "Commercial Bank of Ethiopia"],
-  awash: ["8990", "Awash", "AWASH"],
-  dashen: ["8990", "Dashen", "DASHEN"],
-  boa: ["8990", "Abyssinia", "BOA", "Bank of Abyssinia"],
-  abay: ["8990", "Abay", "ABAY"],
-  coop: ["8990", "CBO", "Cooperative Bank of Oromia"],
-  nib: ["8990", "NIB", "Nib International"],
-  wegagen: ["8990", "Wegagen", "WEGAGEN"],
-  united: ["8990", "United", "United Bank"],
-  bunna: ["8990", "Bunna", "BUNNA"],
-  telebirr: ["8990", "Telebirr", "TELEBIRR", "247"],
-  mpesa: ["8990", "M-Pesa", "MPESA", "Mpesa"],
-  enat: ["8990", "Enat", "ENAT"],
+  cbe: ["CBE", "Commercial Bank of Ethiopia"],
+  awash: ["Awash", "AWASH"],
+  dashen: ["Dashen", "DASHEN"],
+  boa: ["Abyssinia", "BOA", "Bank of Abyssinia"],
+  abay: ["Abay", "ABAY"],
+  coop: ["CBO", "Cooperative Bank of Oromia"],
+  nib: ["NIB", "Nib International"],
+  wegagen: ["Wegagen", "WEGAGEN"],
+  united: ["United", "United Bank"],
+  bunna: ["Bunna", "BUNNA"],
+  telebirr: ["Telebirr", "TELEBIRR", "telebirr"],
+  mpesa: ["M-Pesa", "MPESA", "Mpesa"],
+  enat: ["Enat", "ENAT"],
 };
 
+/**
+ * Common shortcodes that could belong to any bank.
+ * SMS from these senders must be parsed by body content, not sender.
+ */
+export const SHARED_SHORTCODES = ["8990", "247"];
+
+/**
+ * Try to guess the bank from the sender string.
+ * Returns null if sender is ambiguous (e.g. shared shortcode).
+ */
 export function getBankIdBySender(sender: string): string | null {
   const normalized = sender.trim().toUpperCase();
+
+  if (SHARED_SHORTCODES.some((sc) => normalized === sc)) {
+    return null;
+  }
+
   for (const [bankId, senders] of Object.entries(BANK_SMS_SENDERS)) {
-    if (senders.some((s) => s.toUpperCase() === normalized || normalized.includes(s.toUpperCase()))) {
+    if (
+      senders.some(
+        (s) => s.toUpperCase() === normalized || normalized.includes(s.toUpperCase()),
+      )
+    ) {
       return bankId;
     }
   }
   return null;
 }
 
+/**
+ * Check if a sender string is potentially a bank SMS sender.
+ */
+export function isPotentialBankSender(sender: string): boolean {
+  const normalized = sender.trim().toUpperCase();
+
+  if (SHARED_SHORTCODES.some((sc) => normalized === sc)) {
+    return true;
+  }
+
+  for (const senders of Object.values(BANK_SMS_SENDERS)) {
+    if (senders.some((s) => normalized.includes(s.toUpperCase()))) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Get all known sender strings (excluding shared shortcodes).
+ */
 export function getAllSenders(): string[] {
   const set = new Set<string>();
   for (const senders of Object.values(BANK_SMS_SENDERS)) {
     senders.forEach((s) => set.add(s));
   }
+  SHARED_SHORTCODES.forEach((sc) => set.add(sc));
   return Array.from(set);
 }

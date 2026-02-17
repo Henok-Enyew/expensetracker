@@ -1,6 +1,8 @@
 import { Platform } from "react-native";
-import { parseSmsFromSender, syncTransactionFromSms, findBankAccountForParsed } from "./index";
+import { parseSmsAutoDetect, generateSmsIdSync } from "./parser";
+import { syncTransactionFromSms, findBankAccountForParsed } from "./sync";
 import * as storage from "@/lib/storage";
+import { getBankIdBySender } from "@/constants/smsBankShortcodes";
 
 let onImported: (() => void) | null = null;
 
@@ -33,14 +35,28 @@ export async function startSmsListener(): Promise<{ started: boolean; error?: st
     }
     startReadSMS(async (status: string, sms: unknown) => {
       if (status !== "success") return;
-      const parsed = parseSmsPayload(sms);
+      const payload = parseSmsPayload(sms);
+      if (!payload) return;
+      const { address, body } = payload;
+
+      // Auto-detect which bank parser to use
+      const smsId = generateSmsIdSync(body, Date.now());
+      const smsObj = { sender: address, body, date: Date.now(), id: smsId };
+      const parsed = parseSmsAutoDetect(smsObj);
       if (!parsed) return;
-      const { address, body } = parsed;
-      const parsedTxn = parseSmsFromSender(address, body);
-      if (!parsedTxn) return;
+
+      // Check if this bank has sync enabled
       const accounts = await storage.getBankAccounts();
-      const bankAccountId = findBankAccountForParsed(accounts, parsedTxn.bankId);
-      await syncTransactionFromSms(parsedTxn, bankAccountId);
+      const bankAccountId = findBankAccountForParsed(accounts, parsed.bankId);
+
+      if (bankAccountId) {
+        const account = accounts.find((a) => a.id === bankAccountId);
+        if (account && account.smsSyncEnabled === false) {
+          return;
+        }
+      }
+
+      await syncTransactionFromSms(parsed, bankAccountId);
       onImported?.();
     });
     return { started: true };

@@ -1,3 +1,14 @@
+export type TransactionSource = "manual" | "bank_sms" | "loan";
+
+export interface TransactionMetadata {
+  smsId?: string;
+  bankName?: string;
+  smsRawText?: string;
+  accountMask?: string;
+  isFee?: boolean;
+  refNo?: string;
+}
+
 export interface Transaction {
   id: string;
   amount: number;
@@ -8,6 +19,8 @@ export interface Transaction {
   paymentMethod: "cash" | string;
   bankAccountId?: string;
   createdAt: string;
+  source?: TransactionSource;
+  metadata?: TransactionMetadata;
 }
 
 export interface BankAccount {
@@ -16,6 +29,8 @@ export interface BankAccount {
   accountName: string;
   balance: number;
   lastUpdated: string;
+  smsSyncEnabled?: boolean;
+  lastSmsSyncAt?: string;
 }
 
 export interface Budget {
