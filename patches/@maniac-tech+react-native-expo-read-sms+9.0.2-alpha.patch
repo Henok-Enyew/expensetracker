@@ -1,3 +1,16 @@
+diff --git a/node_modules/@maniac-tech/react-native-expo-read-sms/android/build.gradle b/node_modules/@maniac-tech/react-native-expo-read-sms/android/build.gradle
+index 6cef1b4..2827093 100644
+--- a/node_modules/@maniac-tech/react-native-expo-read-sms/android/build.gradle
++++ b/node_modules/@maniac-tech/react-native-expo-read-sms/android/build.gradle
+@@ -17,7 +17,7 @@ android {
+     namespace "com.reactlibrary"
+     defaultConfig {
+         compileSdk 34
+-        minSdkVersion 34
++        minSdkVersion 24
+         targetSdkVersion 34
+         versionCode 1
+         versionName "1.0"
 diff --git a/node_modules/@maniac-tech/react-native-expo-read-sms/android/src/main/java/com/reactlibrary/RNExpoReadSmsModule.java b/node_modules/@maniac-tech/react-native-expo-read-sms/android/src/main/java/com/reactlibrary/RNExpoReadSmsModule.java
 index f78f1fe..97c29db 100644
 --- a/node_modules/@maniac-tech/react-native-expo-read-sms/android/src/main/java/com/reactlibrary/RNExpoReadSmsModule.java
