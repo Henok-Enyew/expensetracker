@@ -2,6 +2,7 @@ import React from "react";
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   Pressable,
@@ -31,9 +32,11 @@ export default function AboutScreen() {
         contentContainerStyle={styles.content}
       >
         <View style={[styles.logoCard, { backgroundColor: c.primary + "10", borderColor: c.primary + "25" }]}>
-          <View style={[styles.logoCircle, { backgroundColor: c.primary }]}>
-            <Text style={styles.logoText}>B</Text>
-          </View>
+          <Image
+            source={require("@/assets/images/icon.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={[styles.appName, { color: c.text }]}>Birr Track</Text>
           <Text style={[styles.version, { color: c.textSecondary }]}>Version 1.0.0</Text>
         </View>
@@ -97,18 +100,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 8,
   },
-  logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
+  logoImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
     marginBottom: 14,
-  },
-  logoText: {
-    fontSize: 32,
-    fontFamily: "Rubik_700Bold",
-    color: "#FFFFFF",
   },
   appName: {
     fontSize: 22,

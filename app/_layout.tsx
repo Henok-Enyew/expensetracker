@@ -62,6 +62,10 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="about"
+        options={{ headerShown: false }}
+      />
     </Stack>
   );
 }
