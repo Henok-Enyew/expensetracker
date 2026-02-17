@@ -18,6 +18,7 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/contexts/ThemeContext";
+import { useSecurity } from "@/contexts/SecurityContext";
 import { generateId, formatCurrency, formatDate } from "@/lib/utils";
 import type { LoanDirection } from "@/lib/types";
 import Colors from "@/constants/colors";
@@ -25,6 +26,7 @@ import Colors from "@/constants/colors";
 export default function FriendDetailScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
+  const { suppressLock, unsuppressLock } = useSecurity();
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     friends,
@@ -115,17 +117,22 @@ export default function FriendDetailScreen() {
 
   const handleChangePhoto = useCallback(async () => {
     if (!friend) return;
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-    if (!result.canceled && result.assets[0]) {
-      await updateFriend({ ...friend, photoUri: result.assets[0].uri });
-      if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    suppressLock();
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets[0]) {
+        await updateFriend({ ...friend, photoUri: result.assets[0].uri });
+        if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    } finally {
+      unsuppressLock();
     }
-  }, [friend, updateFriend]);
+  }, [friend, updateFriend, suppressLock, unsuppressLock]);
 
   if (!friend) {
     return (

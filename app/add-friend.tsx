@@ -16,6 +16,7 @@ import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/contexts/ThemeContext";
+import { useSecurity } from "@/contexts/SecurityContext";
 import { generateId } from "@/lib/utils";
 import Colors from "@/constants/colors";
 
@@ -23,6 +24,7 @@ export default function AddFriendScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
   const { addFriend } = useApp();
+  const { suppressLock, unsuppressLock } = useSecurity();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
@@ -30,14 +32,19 @@ export default function AddFriendScreen() {
   const [saving, setSaving] = useState(false);
 
   const handlePickPhoto = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
+    suppressLock();
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets[0]) {
+        setPhotoUri(result.assets[0].uri);
+      }
+    } finally {
+      unsuppressLock();
     }
   };
 

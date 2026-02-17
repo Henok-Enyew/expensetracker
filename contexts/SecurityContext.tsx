@@ -14,6 +14,8 @@ interface SecurityContextValue {
   hasPin: boolean;
   hasBiometric: boolean;
   isLoading: boolean;
+  suppressLock: () => void;
+  unsuppressLock: () => void;
 }
 
 const SecurityContext = createContext<SecurityContextValue | null>(null);
@@ -24,6 +26,12 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
   const [hasPin, setHasPin] = useState(false);
   const [hasBiometric, setHasBiometric] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const suppressRef = React.useRef(false);
+
+  const suppressLock = useCallback(() => { suppressRef.current = true; }, []);
+  const unsuppressLock = useCallback(() => {
+    setTimeout(() => { suppressRef.current = false; }, 2000);
+  }, []);
 
   const loadSecurityState = useCallback(async () => {
     try {
@@ -51,7 +59,7 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!appLockEnabled) return;
     const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
-      if (nextState === "background" || nextState === "inactive") {
+      if ((nextState === "background" || nextState === "inactive") && !suppressRef.current) {
         setLocked(true);
       }
     });
@@ -109,6 +117,8 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
       hasPin,
       hasBiometric,
       isLoading,
+      suppressLock,
+      unsuppressLock,
     }),
     [
       appLockEnabled,
@@ -120,6 +130,8 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
       hasPin,
       hasBiometric,
       isLoading,
+      suppressLock,
+      unsuppressLock,
     ],
   );
 
