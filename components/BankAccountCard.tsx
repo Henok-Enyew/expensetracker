@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BankAccount } from "@/lib/types";
 import { getBankById } from "@/constants/banks";
 import { formatCurrencyShort } from "@/lib/utils";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface BankAccountCardProps {
@@ -12,17 +13,22 @@ interface BankAccountCardProps {
 }
 
 export function BankAccountCard({ account, onPress }: BankAccountCardProps) {
+  const c = useColors();
   const bank = getBankById(account.bankId);
   if (!bank) return null;
 
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.container, pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] }]}
+      style={({ pressed }) => [
+        styles.container,
+        { backgroundColor: c.surface, borderColor: c.borderLight, shadowColor: c.cardShadow },
+        pressed && { opacity: 0.9, transform: [{ scale: 0.98 }] },
+      ]}
     >
       {account.smsSyncEnabled && (
         <View style={styles.syncBadge}>
-          <Ionicons name="sync-circle" size={14} color={Colors.primary} />
+          <Ionicons name="sync-circle" size={14} color={c.primary} />
         </View>
       )}
       {bank.logo ? (
@@ -32,8 +38,8 @@ export function BankAccountCard({ account, onPress }: BankAccountCardProps) {
           <Text style={styles.logoText}>{bank.iconLetter}</Text>
         </View>
       )}
-      <Text style={styles.bankName} numberOfLines={1}>{bank.shortName}</Text>
-      <Text style={styles.balance}>{formatCurrencyShort(account.balance)}</Text>
+      <Text style={[styles.bankName, { color: c.text }]} numberOfLines={1}>{bank.shortName}</Text>
+      <Text style={[styles.balance, { color: c.textSecondary }]}>{formatCurrencyShort(account.balance)}</Text>
     </Pressable>
   );
 }

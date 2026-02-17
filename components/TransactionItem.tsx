@@ -4,6 +4,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Transaction } from "@/lib/types";
 import { Category } from "@/constants/categories";
 import { formatCurrency, formatDateShort } from "@/lib/utils";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface TransactionItemProps {
@@ -13,14 +14,15 @@ interface TransactionItemProps {
 }
 
 export function TransactionItem({ transaction, category, onPress }: TransactionItemProps) {
+  const c = useColors();
   const isExpense = transaction.type === "expense";
 
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.container, pressed && { backgroundColor: Colors.surfaceSecondary }]}
+      style={({ pressed }) => [styles.container, pressed && { backgroundColor: c.surfaceSecondary }]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: (category?.color || "#78909C") + "18" }]}>
+      <View style={[styles.iconContainer, { backgroundColor: (category?.color || c.textTertiary) + "18" }]}>
         {category ? (
           <MaterialIcons name={category.icon as any} size={22} color={category.color} />
         ) : (
@@ -29,13 +31,13 @@ export function TransactionItem({ transaction, category, onPress }: TransactionI
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.description} numberOfLines={1}>
+        <Text style={[styles.description, { color: c.text }]} numberOfLines={1}>
           {transaction.description || category?.name || "Transaction"}
         </Text>
-        <Text style={styles.date}>{formatDateShort(transaction.date)}</Text>
+        <Text style={[styles.date, { color: c.textTertiary }]}>{formatDateShort(transaction.date)}</Text>
       </View>
 
-      <Text style={[styles.amount, { color: isExpense ? Colors.expense : Colors.income }]}>
+      <Text style={[styles.amount, { color: isExpense ? c.expense : c.income }]}>
         {isExpense ? "-" : "+"}{formatCurrency(transaction.amount)}
       </Text>
     </Pressable>

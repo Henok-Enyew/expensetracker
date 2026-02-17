@@ -11,11 +11,13 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSecurity } from "@/contexts/SecurityContext";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 const PIN_LENGTH = 6;
 
 export function AppLockScreen() {
+  const c = useColors();
   const { unlockWithBiometric, unlockWithPin, hasBiometric, hasPin } = useSecurity();
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
@@ -52,52 +54,52 @@ export function AppLockScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: c.background }]}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.content}>
-        <View style={styles.iconWrap}>
-          <Ionicons name="lock-closed" size={48} color={Colors.primary} />
+        <View style={[styles.iconWrap, { backgroundColor: c.primary + "18" }]}>
+          <Ionicons name="lock-closed" size={48} color={c.primary} />
         </View>
-        <Text style={styles.title}>Birr Track is locked</Text>
-        <Text style={styles.subtitle}>Unlock to continue</Text>
+        <Text style={[styles.title, { color: c.text }]}>Birr Track is locked</Text>
+        <Text style={[styles.subtitle, { color: c.textSecondary }]}>Unlock to continue</Text>
 
         {hasPin && (
           <>
             <TextInput
-              style={styles.pinInput}
+              style={[styles.pinInput, { borderColor: c.border, color: c.text }]}
               value={pin}
               onChangeText={(t) => setPin(t.replace(/\D/g, "").slice(0, PIN_LENGTH))}
               placeholder="Enter PIN"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={c.textTertiary}
               keyboardType="number-pad"
               maxLength={PIN_LENGTH}
               secureTextEntry
               autoFocus={!hasBiometric}
             />
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text style={[styles.error, { color: c.expense }]}>{error}</Text> : null}
           </>
         )}
 
         {hasBiometric && !tryingBiometric && (
           <Pressable
-            style={({ pressed }) => [styles.biometricBtn, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [styles.biometricBtn, { backgroundColor: c.primary }, pressed && { opacity: 0.8 }]}
             onPress={handleUnlockWithBiometric}
           >
-            <Ionicons name="finger-print" size={28} color={Colors.textInverse} />
-            <Text style={styles.biometricBtnText}>Unlock with biometrics</Text>
+            <Ionicons name="finger-print" size={28} color={c.textInverse} />
+            <Text style={[styles.biometricBtnText, { color: c.textInverse }]}>Unlock with biometrics</Text>
           </Pressable>
         )}
 
         {tryingBiometric && (
           <View style={styles.loading}>
-            <ActivityIndicator size="small" color={Colors.primary} />
-            <Text style={styles.loadingText}>Checking biometrics…</Text>
+            <ActivityIndicator size="small" color={c.primary} />
+            <Text style={[styles.loadingText, { color: c.textSecondary }]}>Checking biometrics…</Text>
           </View>
         )}
 
         {!hasPin && !hasBiometric && (
-          <Text style={styles.hint}>Set up app lock and PIN in Settings.</Text>
+          <Text style={[styles.hint, { color: c.textTertiary }]}>Set up app lock and PIN in Settings.</Text>
         )}
       </View>
     </KeyboardAvoidingView>

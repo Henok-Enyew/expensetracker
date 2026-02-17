@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Transaction, BankAccount, Budget } from "./types";
+import { Transaction, BankAccount, Budget, Friend, FriendTransaction } from "./types";
 import { Category, DEFAULT_CATEGORIES } from "@/constants/categories";
 
 const KEYS = {
@@ -9,6 +9,9 @@ const KEYS = {
   CATEGORIES: "@birr_categories",
   CASH_BALANCE: "@birr_cash_balance",
   PROCESSED_SMS_IDS: "@birr_processed_sms_ids",
+  FRIENDS: "@birr_friends",
+  FRIEND_TRANSACTIONS: "@birr_friend_transactions",
+  THEME_MODE: "@birr_theme_mode",
 };
 
 async function getItem<T>(key: string, fallback: T): Promise<T> {
@@ -146,6 +149,73 @@ export async function isSmsDuplicate(smsId: string): Promise<boolean> {
   const ids = await getProcessedSmsIds();
   return ids.has(smsId);
 }
+
+// --- Friends ---
+
+export async function getFriends(): Promise<Friend[]> {
+  return getItem<Friend[]>(KEYS.FRIENDS, []);
+}
+
+export async function saveFriends(friends: Friend[]): Promise<void> {
+  await setItem(KEYS.FRIENDS, friends);
+}
+
+export async function addFriend(friend: Friend): Promise<void> {
+  const friends = await getFriends();
+  friends.push(friend);
+  await saveFriends(friends);
+}
+
+export async function updateFriend(friend: Friend): Promise<void> {
+  const friends = await getFriends();
+  const idx = friends.findIndex((f) => f.id === friend.id);
+  if (idx !== -1) {
+    friends[idx] = friend;
+    await saveFriends(friends);
+  }
+}
+
+export async function deleteFriend(id: string): Promise<void> {
+  const friends = await getFriends();
+  await saveFriends(friends.filter((f) => f.id !== id));
+  const txns = await getFriendTransactions();
+  await saveFriendTransactions(txns.filter((t) => t.friendId !== id));
+}
+
+// --- Friend Transactions ---
+
+export async function getFriendTransactions(): Promise<FriendTransaction[]> {
+  return getItem<FriendTransaction[]>(KEYS.FRIEND_TRANSACTIONS, []);
+}
+
+export async function saveFriendTransactions(txns: FriendTransaction[]): Promise<void> {
+  await setItem(KEYS.FRIEND_TRANSACTIONS, txns);
+}
+
+export async function addFriendTransaction(txn: FriendTransaction): Promise<void> {
+  const txns = await getFriendTransactions();
+  txns.unshift(txn);
+  await saveFriendTransactions(txns);
+}
+
+export async function deleteFriendTransaction(id: string): Promise<void> {
+  const txns = await getFriendTransactions();
+  await saveFriendTransactions(txns.filter((t) => t.id !== id));
+}
+
+// --- Theme ---
+
+export type ThemeMode = "system" | "light" | "dark";
+
+export async function getThemeMode(): Promise<ThemeMode> {
+  return getItem<ThemeMode>(KEYS.THEME_MODE, "system");
+}
+
+export async function setThemeMode(mode: ThemeMode): Promise<void> {
+  await setItem(KEYS.THEME_MODE, mode);
+}
+
+// --- Export ---
 
 export async function exportTransactionsCSV(txns: Transaction[], categories: Category[]): Promise<string> {
   const header = "Date,Type,Amount (ETB),Category,Description,Payment Method\n";

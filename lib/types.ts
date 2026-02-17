@@ -41,3 +41,27 @@ export interface Budget {
 }
 
 export type Period = "daily" | "monthly" | "yearly";
+
+// --- Loans & Debts ---
+
+export type FriendId = string;
+
+export interface Friend {
+  id: FriendId;
+  name: string;
+  phone?: string;
+  note?: string;
+  createdAt: string;
+}
+
+export type LoanDirection = "lent" | "borrowed";
+
+export interface FriendTransaction {
+  id: string;
+  friendId: FriendId;
+  direction: LoanDirection;
+  amount: number;
+  reason?: string;
+  date: string;
+  createdAt: string;
+}

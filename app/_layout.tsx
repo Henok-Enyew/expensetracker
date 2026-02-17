@@ -9,6 +9,7 @@ import { AppLockScreen } from "@/components/AppLockScreen";
 import { queryClient } from "@/lib/query-client";
 import { AppProvider } from "@/contexts/AppContext";
 import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import {
   useFonts,
   Inter_400Regular,
@@ -48,6 +49,17 @@ function RootLayoutNav() {
         name="bank-detail"
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="friend-detail"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="add-friend"
+        options={{
+          presentation: "modal",
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
@@ -80,13 +92,15 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <KeyboardProvider>
-            <SecurityProvider>
-              <AppProvider>
-                <LockGate>
-                  <RootLayoutNav />
-                </LockGate>
-              </AppProvider>
-            </SecurityProvider>
+            <ThemeProvider>
+              <SecurityProvider>
+                <AppProvider>
+                  <LockGate>
+                    <RootLayoutNav />
+                  </LockGate>
+                </AppProvider>
+              </SecurityProvider>
+            </ThemeProvider>
           </KeyboardProvider>
         </GestureHandlerRootView>
       </QueryClientProvider>

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { formatCurrency } from "@/lib/utils";
+import { useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface BalanceCardProps {
@@ -12,9 +13,10 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps) {
+  const c = useColors();
   return (
     <LinearGradient
-      colors={[Colors.primary, Colors.primaryDark]}
+      colors={[c.primary, c.primaryDark]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}

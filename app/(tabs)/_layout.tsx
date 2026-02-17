@@ -3,10 +3,10 @@ import { Tabs } from "expo-router";
 import { NativeTabs, Icon, Label } from "expo-router/unstable-native-tabs";
 import { BlurView } from "expo-blur";
 import { SymbolView } from "expo-symbols";
-import { Platform, StyleSheet, useColorScheme, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import Colors from "@/constants/colors";
+import { useTheme } from "@/contexts/ThemeContext";
 
 function NativeTabLayout() {
   return (
@@ -15,9 +15,9 @@ function NativeTabLayout() {
         <Icon sf={{ default: "house", selected: "house.fill" }} />
         <Label>Home</Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="transactions">
-        <Icon sf={{ default: "list.bullet.rectangle", selected: "list.bullet.rectangle.fill" }} />
-        <Label>History</Label>
+      <NativeTabs.Trigger name="friends">
+        <Icon sf={{ default: "person.2", selected: "person.2.fill" }} />
+        <Label>Friends</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="analytics">
         <Icon sf={{ default: "chart.pie", selected: "chart.pie.fill" }} />
@@ -36,8 +36,7 @@ function NativeTabLayout() {
 }
 
 function ClassicTabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { colors, isDark } = useTheme();
   const isWeb = Platform.OS === "web";
   const isIOS = Platform.OS === "ios";
 
@@ -45,13 +44,13 @@ function ClassicTabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.navInactive,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.navInactive,
         tabBarStyle: {
           position: "absolute" as const,
-          backgroundColor: isIOS ? "transparent" : isDark ? "#0F172A" : "#FFFFFF",
+          backgroundColor: isIOS ? "transparent" : colors.navBackground,
           borderTopWidth: isWeb ? 1 : 0,
-          borderTopColor: isDark ? "#334155" : Colors.border,
+          borderTopColor: colors.border,
           elevation: 0,
           ...(isWeb ? { height: 84 } : {}),
         },
@@ -59,7 +58,7 @@ function ClassicTabLayout() {
           isIOS ? (
             <BlurView intensity={100} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
           ) : isWeb ? (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? "#0F172A" : "#FFFFFF" }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.navBackground }]} />
           ) : null,
         tabBarLabelStyle: {
           fontSize: 11,
@@ -75,10 +74,16 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="friends"
+        options={{
+          title: "Friends",
+          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="transactions"
         options={{
-          title: "History",
-          tabBarIcon: ({ color, size }) => <Ionicons name="list" size={size} color={color} />,
+          href: null,
         }}
       />
       <Tabs.Screen

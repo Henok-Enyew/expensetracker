@@ -20,6 +20,7 @@ import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
 import { exportTransactionsCSV } from "@/lib/storage";
 import { setSmsImportedCallback } from "@/lib/sms";
+import { useTheme, useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
 interface SettingItemProps {
@@ -29,32 +30,35 @@ interface SettingItemProps {
   subtitle?: string;
   onPress: () => void;
   danger?: boolean;
+  colors: ReturnType<typeof useColors>;
 }
 
-function SettingItem({ icon, iconFamily = "Ionicons", label, subtitle, onPress, danger }: SettingItemProps) {
+function SettingItem({ icon, iconFamily = "Ionicons", label, subtitle, onPress, danger, colors }: SettingItemProps) {
+  const c = colors;
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.settingItem, pressed && { backgroundColor: Colors.surfaceSecondary }]}
+      style={({ pressed }) => [styles.settingItem, pressed && { backgroundColor: c.surfaceSecondary }]}
     >
-      <View style={[styles.settingIcon, { backgroundColor: danger ? Colors.expenseLight : Colors.primary + "15" }]}>
+      <View style={[styles.settingIcon, { backgroundColor: danger ? c.expenseLight : c.primary + "15" }]}>
         {iconFamily === "MaterialIcons" ? (
-          <MaterialIcons name={icon as any} size={20} color={danger ? Colors.expense : Colors.primary} />
+          <MaterialIcons name={icon as any} size={20} color={danger ? c.expense : c.primary} />
         ) : (
-          <Ionicons name={icon as any} size={20} color={danger ? Colors.expense : Colors.primary} />
+          <Ionicons name={icon as any} size={20} color={danger ? c.expense : c.primary} />
         )}
       </View>
       <View style={styles.settingContent}>
-        <Text style={[styles.settingLabel, danger && { color: Colors.expense }]}>{label}</Text>
-        {subtitle && <Text style={styles.settingSubtitle}>{subtitle}</Text>}
+        <Text style={[styles.settingLabel, { color: c.text }, danger && { color: c.expense }]}>{label}</Text>
+        {subtitle && <Text style={[styles.settingSubtitle, { color: c.textSecondary }]}>{subtitle}</Text>}
       </View>
-      <Ionicons name="chevron-forward" size={18} color={Colors.textTertiary} />
+      <Ionicons name="chevron-forward" size={18} color={c.textTertiary} />
     </Pressable>
   );
 }
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const c = useColors();
   const { transactions, categories, refreshData } = useApp();
   const {
     hasPermission: smsPermission,
@@ -63,6 +67,7 @@ export default function SettingsScreen() {
     request: requestSmsPermission,
     openAppSettings,
   } = useSmsPermission();
+  const { mode: themeMode, setMode: setThemeMode, isDark } = useTheme();
   const [smsError, setSmsError] = useState<string | null>(null);
   const {
     appLockEnabled,
@@ -223,33 +228,33 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + webTopInset }]}>
-      <Text style={styles.title}>Settings</Text>
+    <View style={[styles.container, { paddingTop: insets.top + webTopInset, backgroundColor: c.background }]}>
+      <Text style={[styles.title, { color: c.text }]}>Settings</Text>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <Text style={styles.sectionLabel}>SECURITY</Text>
-        <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: c.textTertiary }]}>SECURITY</Text>
+        <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <View style={styles.settingItem}>
-            <View style={[styles.settingIcon, { backgroundColor: Colors.primary + "15" }]}>
-              <Ionicons name="lock-closed" size={20} color={Colors.primary} />
+            <View style={[styles.settingIcon, { backgroundColor: c.primary + "15" }]}>
+              <Ionicons name="lock-closed" size={20} color={c.primary} />
             </View>
             <View style={styles.settingContent}>
-              <Text style={styles.settingLabel}>App Lock</Text>
-              <Text style={styles.settingSubtitle}>
+              <Text style={[styles.settingLabel, { color: c.text }]}>App Lock</Text>
+              <Text style={[styles.settingSubtitle, { color: c.textSecondary }]}>
                 Lock app with biometrics or PIN when backgrounded
               </Text>
             </View>
             <Switch
               value={appLockEnabled}
               onValueChange={handleAppLockToggle}
-              trackColor={{ false: Colors.border, true: Colors.primary + "60" }}
-              thumbColor={appLockEnabled ? Colors.primary : Colors.surface}
+              trackColor={{ false: c.border, true: c.primary + "60" }}
+              thumbColor={appLockEnabled ? c.primary : c.surface}
             />
           </View>
         </View>
 
-        <Text style={styles.sectionLabel}>{isAndroid ? "SMS IMPORT (ANDROID)" : "SMS IMPORT"}</Text>
-        <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: c.textTertiary }]}>{isAndroid ? "SMS IMPORT (ANDROID)" : "SMS IMPORT"}</Text>
+        <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           {isAndroid ? (
             <>
               <Pressable
@@ -257,12 +262,12 @@ export default function SettingsScreen() {
                 onPress={handleRequestSmsPermission}
                 disabled={smsChecking}
               >
-                <View style={[styles.settingIcon, { backgroundColor: Colors.primary + "15" }]}>
-                  <Ionicons name="chatbubble-outline" size={20} color={Colors.primary} />
+                <View style={[styles.settingIcon, { backgroundColor: c.primary + "15" }]}>
+                  <Ionicons name="chatbubble-outline" size={20} color={c.primary} />
                 </View>
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingLabel}>SMS Permission</Text>
-                  <Text style={styles.settingSubtitle}>
+                  <Text style={[styles.settingLabel, { color: c.text }]}>SMS Permission</Text>
+                  <Text style={[styles.settingSubtitle, { color: c.textSecondary }]}>
                     {smsChecking
                       ? "Checking…"
                       : smsPermission
@@ -270,111 +275,153 @@ export default function SettingsScreen() {
                         : "Grant permission to read bank SMS"}
                   </Text>
                 </View>
-                {smsPermission && <Ionicons name="checkmark-circle" size={22} color={Colors.income} />}
+                {smsPermission && <Ionicons name="checkmark-circle" size={22} color={c.income} />}
               </Pressable>
-              <View style={styles.smsHintWrap}>
-                <Ionicons name="information-circle-outline" size={16} color={Colors.textTertiary} />
-                <Text style={styles.smsHintText}>
+              <View style={[styles.smsHintWrap, { borderTopColor: c.borderLight }]}>
+                <Ionicons name="information-circle-outline" size={16} color={c.textTertiary} />
+                <Text style={[styles.smsHintText, { color: c.textTertiary }]}>
                   Tap a bank account on the Home screen to configure SMS sync for each bank individually.
                 </Text>
               </View>
               {smsError ? (
-                <View style={styles.smsErrorWrap}>
-                  <Text style={styles.smsError}>{smsError}</Text>
-                  <Text style={styles.smsErrorHint}>Use a development build (not Expo Go) for SMS.</Text>
+                <View style={[styles.smsErrorWrap, { borderTopColor: c.border }]}>
+                  <Text style={[styles.smsError, { color: c.expense }]}>{smsError}</Text>
+                  <Text style={[styles.smsErrorHint, { color: c.textTertiary }]}>Use a development build (not Expo Go) for SMS.</Text>
                 </View>
               ) : null}
             </>
           ) : (
             <View style={styles.settingItem}>
-              <View style={[styles.settingIcon, { backgroundColor: Colors.surfaceSecondary }]}>
-                <Ionicons name="chatbubble-outline" size={20} color={Colors.textTertiary} />
+              <View style={[styles.settingIcon, { backgroundColor: c.surfaceSecondary }]}>
+                <Ionicons name="chatbubble-outline" size={20} color={c.textTertiary} />
               </View>
               <View style={styles.settingContent}>
-                <Text style={styles.settingLabel}>SMS import</Text>
-                <Text style={styles.settingSubtitle}>Available on Android only</Text>
+                <Text style={[styles.settingLabel, { color: c.text }]}>SMS import</Text>
+                <Text style={[styles.settingSubtitle, { color: c.textSecondary }]}>Available on Android only</Text>
               </View>
             </View>
           )}
         </View>
 
-        <Text style={styles.sectionLabel}>DATA</Text>
-        <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: c.textTertiary }]}>DATA</Text>
+        <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <SettingItem
             icon="download-outline"
             label="Export Transactions"
             subtitle="Export as CSV file"
             onPress={handleExport}
+            colors={c}
           />
           <SettingItem
             icon="refresh"
             label="Refresh Data"
             subtitle="Reload all data from storage"
             onPress={refreshData}
+            colors={c}
           />
         </View>
 
-        <Text style={styles.sectionLabel}>GENERAL</Text>
-        <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: c.textTertiary }]}>APPEARANCE</Text>
+        <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
+          <View style={styles.settingItem}>
+            <View style={[styles.settingIcon, { backgroundColor: c.primary + "15" }]}>
+              <Ionicons name={isDark ? "moon" : "sunny"} size={20} color={c.primary} />
+            </View>
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingLabel, { color: c.text }]}>Theme</Text>
+              <Text style={[styles.settingSubtitle, { color: c.textSecondary }]}>
+                {themeMode === "system" ? "Follow system" : themeMode === "dark" ? "Dark mode" : "Light mode"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.themeRow}>
+            {(["system", "light", "dark"] as const).map((m) => (
+              <Pressable
+                key={m}
+                style={[
+                  styles.themeOption,
+                  { backgroundColor: c.surfaceSecondary },
+                  themeMode === m && { borderColor: c.primary, backgroundColor: c.primary + "10" },
+                ]}
+                onPress={() => setThemeMode(m)}
+              >
+                <Ionicons
+                  name={m === "system" ? "phone-portrait-outline" : m === "light" ? "sunny-outline" : "moon-outline"}
+                  size={18}
+                  color={themeMode === m ? c.primary : c.textTertiary}
+                />
+                <Text style={[styles.themeOptionText, { color: c.textSecondary }, themeMode === m && { color: c.primary }]}>
+                  {m === "system" ? "System" : m === "light" ? "Light" : "Dark"}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: c.textTertiary }]}>GENERAL</Text>
+        <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <SettingItem
             icon="cash-outline"
             label="Currency"
             subtitle="Ethiopian Birr (ETB)"
             onPress={() => {}}
+            colors={c}
           />
           <SettingItem
             icon="information-circle-outline"
             label="About"
             subtitle="Birr Track v1.0.0"
             onPress={() => {}}
+            colors={c}
           />
         </View>
 
-        <Text style={styles.sectionLabel}>DANGER ZONE</Text>
-        <View style={styles.section}>
+        <Text style={[styles.sectionLabel, { color: c.textTertiary }]}>DANGER ZONE</Text>
+        <View style={[styles.section, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <SettingItem
             icon="trash-outline"
             label="Clear All Data"
             subtitle="Delete all transactions and settings"
             onPress={handleClearData}
             danger
+            colors={c}
           />
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Birr Track</Text>
-          <Text style={styles.footerSubtext}>Ethiopian Expense Tracker</Text>
-          <Text style={styles.footerVersion}>Version 1.0.0</Text>
+          <Text style={[styles.footerText, { color: c.primary }]}>Birr Track</Text>
+          <Text style={[styles.footerSubtext, { color: c.textSecondary }]}>Ethiopian Expense Tracker</Text>
+          <Text style={[styles.footerVersion, { color: c.textTertiary }]}>Version 1.0.0</Text>
         </View>
       </ScrollView>
 
       <Modal visible={pinModalVisible} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setPinModalVisible(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <Text style={styles.modalTitle}>
+          <Pressable style={[styles.modalContent, { backgroundColor: c.surface, borderColor: c.border }]} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.modalTitle, { color: c.text }]}>
               {pinStep === "set" ? "Set PIN" : "Confirm PIN"}
             </Text>
-            <Text style={styles.modalSubtitle}>
+            <Text style={[styles.modalSubtitle, { color: c.textSecondary }]}>
               {pinStep === "set"
                 ? "Enter a 4–6 digit PIN to unlock the app."
                 : "Re-enter your PIN."}
             </Text>
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { borderColor: c.border, color: c.text }]}
               value={pinStep === "set" ? pinValue : pinConfirm}
               onChangeText={pinStep === "set" ? setPinValue : setPinConfirm}
               placeholder="PIN"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={c.textTertiary}
               keyboardType="number-pad"
               maxLength={6}
               secureTextEntry
             />
             <View style={styles.modalButtons}>
               <Pressable style={styles.modalButtonSecondary} onPress={() => setPinModalVisible(false)}>
-                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                <Text style={[styles.modalButtonSecondaryText, { color: c.textSecondary }]}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.modalButtonPrimary} onPress={handlePinModalSubmit}>
-                <Text style={styles.modalButtonPrimaryText}>
+              <Pressable style={[styles.modalButtonPrimary, { backgroundColor: c.primary }]} onPress={handlePinModalSubmit}>
+                <Text style={[styles.modalButtonPrimaryText, { color: c.textInverse }]}>
                   {pinStep === "confirm" ? "Enable" : "Next"}
                 </Text>
               </Pressable>
@@ -385,15 +432,15 @@ export default function SettingsScreen() {
 
       <Modal visible={disablePinModalVisible} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setDisablePinModalVisible(false)}>
-          <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-            <Text style={styles.modalTitle}>Enter PIN to disable</Text>
-            <Text style={styles.modalSubtitle}>Enter your app lock PIN.</Text>
+          <Pressable style={[styles.modalContent, { backgroundColor: c.surface, borderColor: c.border }]} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.modalTitle, { color: c.text }]}>Enter PIN to disable</Text>
+            <Text style={[styles.modalSubtitle, { color: c.textSecondary }]}>Enter your app lock PIN.</Text>
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { borderColor: c.border, color: c.text }]}
               value={disablePinValue}
               onChangeText={setDisablePinValue}
               placeholder="PIN"
-              placeholderTextColor={Colors.textTertiary}
+              placeholderTextColor={c.textTertiary}
               keyboardType="number-pad"
               maxLength={6}
               secureTextEntry
@@ -403,10 +450,10 @@ export default function SettingsScreen() {
                 style={styles.modalButtonSecondary}
                 onPress={() => setDisablePinModalVisible(false)}
               >
-                <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
+                <Text style={[styles.modalButtonSecondaryText, { color: c.textSecondary }]}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.modalButtonPrimary} onPress={handleDisablePinSubmit}>
-                <Text style={styles.modalButtonPrimaryText}>Disable</Text>
+              <Pressable style={[styles.modalButtonPrimary, { backgroundColor: c.primary }]} onPress={handleDisablePinSubmit}>
+                <Text style={[styles.modalButtonPrimaryText, { color: c.textInverse }]}>Disable</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -558,6 +605,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: Colors.textInverse,
+  },
+  themeRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  themeOption: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: Colors.surfaceSecondary,
+    borderWidth: 1.5,
+    borderColor: "transparent",
+  },
+  themeOptionActive: {
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary + "10",
+  },
+  themeOptionText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: Colors.textSecondary,
+  },
+  themeOptionTextActive: {
+    color: Colors.primary,
+    fontFamily: "Inter_600SemiBold",
   },
   smsHintWrap: {
     flexDirection: "row",
