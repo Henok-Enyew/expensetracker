@@ -51,6 +51,7 @@ export interface Friend {
   name: string;
   phone?: string;
   note?: string;
+  photoUri?: string;
   createdAt: string;
 }
 

@@ -9,11 +9,13 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/contexts/ThemeContext";
 import { generateId, formatCurrency, formatDate } from "@/lib/utils";
@@ -31,6 +33,7 @@ export default function FriendDetailScreen() {
     addFriendTransaction,
     deleteFriendTransaction,
     deleteFriend,
+    updateFriend,
   } = useApp();
 
   const friend = friends.find((f) => f.id === id);
@@ -110,6 +113,20 @@ export default function FriendDetailScreen() {
     );
   }, [friend, deleteFriend]);
 
+  const handleChangePhoto = useCallback(async () => {
+    if (!friend) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets[0]) {
+      await updateFriend({ ...friend, photoUri: result.assets[0].uri });
+      if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  }, [friend, updateFriend]);
+
   if (!friend) {
     return (
       <View style={[styles.container, { paddingTop: insets.top, backgroundColor: c.background }]}>
@@ -148,33 +165,42 @@ export default function FriendDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
         {/* Profile & Net Card */}
         <View style={styles.profileCard}>
-          <View
-            style={[
-              styles.bigAvatar,
-              {
-                backgroundColor: isNeutral
-                  ? c.surfaceTertiary
-                  : isPositive
-                    ? c.incomeLight
-                    : c.expenseLight,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.bigAvatarText,
-                {
-                  color: isNeutral
-                    ? c.textSecondary
-                    : isPositive
-                      ? c.income
-                      : c.expense,
-                },
-              ]}
-            >
-              {friend.name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+          <Pressable onPress={handleChangePhoto} style={styles.avatarWrap}>
+            {friend.photoUri ? (
+              <Image source={{ uri: friend.photoUri }} style={styles.bigAvatarImage} />
+            ) : (
+              <View
+                style={[
+                  styles.bigAvatar,
+                  {
+                    backgroundColor: isNeutral
+                      ? c.surfaceTertiary
+                      : isPositive
+                        ? c.incomeLight
+                        : c.expenseLight,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.bigAvatarText,
+                    {
+                      color: isNeutral
+                        ? c.textSecondary
+                        : isPositive
+                          ? c.income
+                          : c.expense,
+                    },
+                  ]}
+                >
+                  {friend.name.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={[styles.photoBadge, { backgroundColor: c.primary, borderColor: c.background }]}>
+              <Ionicons name="camera-outline" size={14} color={c.textInverse} />
+            </View>
+          </Pressable>
           <Text style={[styles.profileName, { color: c.text }]}>{friend.name}</Text>
           {friend.phone ? (
             <Text style={[styles.profilePhone, { color: c.textSecondary }]}>{friend.phone}</Text>
@@ -390,13 +416,32 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     paddingHorizontal: 20,
   },
+  avatarWrap: {
+    position: "relative",
+    marginBottom: 12,
+  },
   bigAvatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+  },
+  bigAvatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  photoBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: -2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
   },
   bigAvatarText: {
     fontSize: 30,

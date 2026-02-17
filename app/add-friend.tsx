@@ -7,11 +7,13 @@ import {
   Pressable,
   ScrollView,
   Platform,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import * as ImagePicker from "expo-image-picker";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/contexts/ThemeContext";
 import { generateId } from "@/lib/utils";
@@ -24,7 +26,20 @@ export default function AddFriendScreen() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
+  const [photoUri, setPhotoUri] = useState<string | undefined>();
   const [saving, setSaving] = useState(false);
+
+  const handlePickPhoto = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets[0]) {
+      setPhotoUri(result.assets[0].uri);
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -36,6 +51,7 @@ export default function AddFriendScreen() {
         name: name.trim(),
         phone: phone.trim() || undefined,
         note: note.trim() || undefined,
+        photoUri,
         createdAt: new Date().toISOString(),
       });
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -62,14 +78,22 @@ export default function AddFriendScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {/* Avatar Preview */}
-        <View style={styles.avatarPreview}>
-          <View style={[styles.avatar, { backgroundColor: c.primary + "15" }]}>
-            <Text style={[styles.avatarText, { color: c.primary }]}>
-              {name.trim() ? name.charAt(0).toUpperCase() : "?"}
-            </Text>
+        {/* Avatar / Photo Picker */}
+        <Pressable style={styles.avatarPreview} onPress={handlePickPhoto}>
+          {photoUri ? (
+            <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+          ) : (
+            <View style={[styles.avatar, { backgroundColor: c.primary + "15" }]}>
+              <Text style={[styles.avatarText, { color: c.primary }]}>
+                {name.trim() ? name.charAt(0).toUpperCase() : "?"}
+              </Text>
+            </View>
+          )}
+          <View style={[styles.cameraBadge, { backgroundColor: c.primary }]}>
+            <Ionicons name="camera-outline" size={14} color={c.textInverse} />
           </View>
-        </View>
+          <Text style={[styles.photoHint, { color: c.textTertiary }]}>Tap to add photo</Text>
+        </Pressable>
 
         <Text style={[styles.label, { color: c.text }]}>Name *</Text>
         <TextInput
@@ -135,17 +159,39 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: Colors.primary + "15",
     alignItems: "center",
     justifyContent: "center",
   },
+  avatarImage: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+  },
   avatarText: {
-    fontSize: 32,
+    fontSize: 34,
     fontFamily: "Rubik_700Bold",
     color: Colors.primary,
+  },
+  cameraBadge: {
+    position: "absolute",
+    bottom: 38,
+    right: "33%",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: Colors.background,
+  },
+  photoHint: {
+    fontSize: 12,
+    fontFamily: "Rubik_400Regular",
+    marginTop: 8,
   },
   label: {
     fontSize: 14,

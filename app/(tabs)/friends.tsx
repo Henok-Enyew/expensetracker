@@ -7,6 +7,7 @@ import {
   Pressable,
   Platform,
   RefreshControl,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -138,33 +139,37 @@ export default function FriendsScreen() {
                       router.push({ pathname: "/friend-detail", params: { id: friend.id } })
                     }
                   >
-                    <View
-                      style={[
-                        styles.avatar,
-                        {
-                          backgroundColor: isNeutral
-                            ? c.surfaceTertiary
-                            : isPositive
-                              ? c.incomeLight
-                              : c.expenseLight,
-                        },
-                      ]}
-                    >
-                      <Text
+                    {friend.photoUri ? (
+                      <Image source={{ uri: friend.photoUri }} style={styles.avatarImage} />
+                    ) : (
+                      <View
                         style={[
-                          styles.avatarText,
+                          styles.avatar,
                           {
-                            color: isNeutral
-                              ? c.textSecondary
+                            backgroundColor: isNeutral
+                              ? c.surfaceTertiary
                               : isPositive
-                                ? c.income
-                                : c.expense,
+                                ? c.incomeLight
+                                : c.expenseLight,
                           },
                         ]}
                       >
-                        {friend.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
+                        <Text
+                          style={[
+                            styles.avatarText,
+                            {
+                              color: isNeutral
+                                ? c.textSecondary
+                                : isPositive
+                                  ? c.income
+                                  : c.expense,
+                            },
+                          ]}
+                        >
+                          {friend.name.charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
 
                     <View style={styles.friendInfo}>
                       <Text style={[styles.friendName, { color: c.text }]}>{friend.name}</Text>
@@ -309,6 +314,11 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   avatarText: {
     fontSize: 18,
