@@ -5,13 +5,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { formatCurrency } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 
+const MASKED = "••••••";
+
 interface BalanceCardProps {
   totalBalance: number;
   income: number;
   expense: number;
+  amountsVisible?: boolean;
 }
 
-export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps) {
+export function BalanceCard({ totalBalance, income, expense, amountsVisible = false }: BalanceCardProps) {
   const { colors: c, isDark } = useTheme();
   const textMain = isDark ? "#1C0F22" : "#FFFFFF";
   const textSub = isDark ? "rgba(28,15,34,0.55)" : "rgba(255,255,255,0.65)";
@@ -25,7 +28,9 @@ export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps)
       style={styles.container}
     >
       <Text style={[styles.label, { color: textSub }]}>Total Balance</Text>
-      <Text style={[styles.balance, { color: textMain }]}>{formatCurrency(totalBalance)}</Text>
+      <Text style={[styles.balance, { color: textMain }]}>
+        {amountsVisible ? formatCurrency(totalBalance) : `ETB ${MASKED}`}
+      </Text>
 
       <View style={styles.row}>
         <View style={styles.metric}>
@@ -35,7 +40,9 @@ export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps)
             </View>
             <Text style={[styles.metricLabel, { color: textSub }]}>Income</Text>
           </View>
-          <Text style={[styles.metricValue, { color: textMain }]}>{formatCurrency(income)}</Text>
+          <Text style={[styles.metricValue, { color: textMain }]}>
+            {amountsVisible ? formatCurrency(income) : MASKED}
+          </Text>
         </View>
 
         <View style={[styles.divider, { backgroundColor: dividerColor }]} />
@@ -47,7 +54,9 @@ export function BalanceCard({ totalBalance, income, expense }: BalanceCardProps)
             </View>
             <Text style={[styles.metricLabel, { color: textSub }]}>Expense</Text>
           </View>
-          <Text style={[styles.metricValue, { color: textMain }]}>{formatCurrency(expense)}</Text>
+          <Text style={[styles.metricValue, { color: textMain }]}>
+            {amountsVisible ? formatCurrency(expense) : MASKED}
+          </Text>
         </View>
       </View>
     </LinearGradient>

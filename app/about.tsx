@@ -43,10 +43,13 @@ export default function AboutScreen() {
 
         <View style={[styles.messageCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <Text style={[styles.messageText, { color: c.text }]}>
+            Hi there I am Henok Enyew, Software Engineer.
+          </Text>
+          <Text style={[styles.messageText, { color: c.text, marginTop: 16 }]}>
             I built this app because I couldn't find the perfect app for my needs to manage my expenses and to track my loans and debts with my friends.
           </Text>
           <Text style={[styles.messageText, { color: c.text, marginTop: 16 }]}>
-            Feel free to reach me out for any bug fixes and feature requests.
+            Feel free to reach out for any bug fixes and feature requests.
           </Text>
         </View>
 

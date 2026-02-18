@@ -58,10 +58,15 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!appLockEnabled) return;
+    let prevState = AppState.currentState;
     const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
       if ((nextState === "background" || nextState === "inactive") && !suppressRef.current) {
         setLocked(true);
       }
+      if (nextState === "active" && (prevState === "background" || prevState === "inactive")) {
+        if (!suppressRef.current) setLocked(true);
+      }
+      prevState = nextState;
     });
     return () => sub.remove();
   }, [appLockEnabled]);

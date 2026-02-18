@@ -143,7 +143,7 @@ export default function BudgetScreen() {
         </Pressable>
       </View>
 
-      {/* Period Tabs */}
+      {/* Period Tabs: label row + count row below so button size and label alignment stay consistent */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.periodRow}>
         {PERIODS.map((p) => {
           const active = selectedPeriod === p;
@@ -158,19 +158,19 @@ export default function BudgetScreen() {
                 active && { backgroundColor: c.primary + "12", borderColor: c.primary },
               ]}
             >
-              <Ionicons
-                name={PERIOD_ICONS[p] as any}
-                size={16}
-                color={active ? c.primary : c.textTertiary}
-              />
-              <Text style={[styles.periodText, { color: c.textSecondary }, active && { color: c.primary, fontFamily: "Rubik_600SemiBold" }]}>
-                {getPeriodLabel(p)}
-              </Text>
-              {count > 0 && (
-                <View style={[styles.periodBadge, { backgroundColor: active ? c.primary : c.textTertiary }]}>
-                  <Text style={styles.periodBadgeText}>{count}</Text>
-                </View>
-              )}
+              <View style={styles.periodChipLabelRow}>
+                <Ionicons
+                  name={PERIOD_ICONS[p] as any}
+                  size={16}
+                  color={active ? c.primary : c.textTertiary}
+                />
+                <Text style={[styles.periodText, { color: c.textSecondary }, active && { color: c.primary, fontFamily: "Rubik_600SemiBold" }]}>
+                  {getPeriodLabel(p)}
+                </Text>
+              </View>
+              <View style={styles.periodChipCountRow}>
+                <Text style={[styles.periodCountText, { color: active ? c.primary : c.textTertiary }]}>{count}</Text>
+              </View>
             </Pressable>
           );
         })}
@@ -301,29 +301,32 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   periodChip: {
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 76,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    gap: 4,
+  },
+  periodChipLabelRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    borderWidth: 1.5,
   },
   periodText: {
     fontSize: 13,
     fontFamily: "Rubik_500Medium",
   },
-  periodBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+  periodChipCountRow: {
+    minHeight: 16,
     alignItems: "center",
     justifyContent: "center",
   },
-  periodBadgeText: {
-    fontSize: 10,
-    fontFamily: "Rubik_700Bold",
-    color: "#FFFFFF",
+  periodCountText: {
+    fontSize: 12,
+    fontFamily: "Rubik_600SemiBold",
   },
   dateLabel: {
     fontSize: 13,

@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { useApp } from "@/contexts/AppContext";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
@@ -195,10 +197,23 @@ export default function SettingsScreen() {
         a.click();
         URL.revokeObjectURL(url);
       } else {
-        await Share.share({
-          message: csv,
-          title: "Birr Track Transactions",
+        const filename = `birr-track-transactions-${Date.now()}.csv`;
+        const path = `${FileSystem.cacheDirectory}${filename}`;
+        await FileSystem.writeAsStringAsync(path, csv, {
+          encoding: FileSystem.EncodingType.UTF8,
         });
+        const canShare = await Sharing.isAvailableAsync();
+        if (canShare) {
+          await Sharing.shareAsync(path, {
+            mimeType: "text/csv",
+            dialogTitle: "Export transactions as CSV file",
+          });
+        } else {
+          await Share.share({
+            message: csv,
+            title: "Birr Track Transactions",
+          });
+        }
       }
     } catch (e) {
       Alert.alert("Export Failed", "Could not export transactions.");

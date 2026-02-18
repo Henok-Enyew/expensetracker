@@ -1,5 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Transaction, BankAccount, Budget, Friend, FriendTransaction } from "./types";
+import {
+  Transaction,
+  BankAccount,
+  Budget,
+  Friend,
+  FriendTransaction,
+} from "./types";
 import { Category, DEFAULT_CATEGORIES } from "@/constants/categories";
 
 const KEYS = {
@@ -90,7 +96,11 @@ export async function getBudgets(): Promise<Budget[]> {
     if (b.month && !b.period) {
       needsSave = true;
       const { month, ...rest } = b;
-      return { ...rest, period: "monthly" as const, createdAt: b.createdAt || new Date().toISOString() };
+      return {
+        ...rest,
+        period: "monthly" as const,
+        createdAt: b.createdAt || new Date().toISOString(),
+      };
     }
     if (!b.createdAt) {
       needsSave = true;
@@ -205,11 +215,15 @@ export async function getFriendTransactions(): Promise<FriendTransaction[]> {
   return getItem<FriendTransaction[]>(KEYS.FRIEND_TRANSACTIONS, []);
 }
 
-export async function saveFriendTransactions(txns: FriendTransaction[]): Promise<void> {
+export async function saveFriendTransactions(
+  txns: FriendTransaction[],
+): Promise<void> {
   await setItem(KEYS.FRIEND_TRANSACTIONS, txns);
 }
 
-export async function addFriendTransaction(txn: FriendTransaction): Promise<void> {
+export async function addFriendTransaction(
+  txn: FriendTransaction,
+): Promise<void> {
   const txns = await getFriendTransactions();
   txns.unshift(txn);
   await saveFriendTransactions(txns);
@@ -234,7 +248,10 @@ export async function setThemeMode(mode: ThemeMode): Promise<void> {
 
 // --- Export ---
 
-export async function exportTransactionsCSV(txns: Transaction[], categories: Category[]): Promise<string> {
+export async function exportTransactionsCSV(
+  txns: Transaction[],
+  categories: Category[],
+): Promise<string> {
   const header = "Date,Type,Amount (ETB),Category,Description,Payment Method\n";
   const rows = txns.map((t) => {
     const cat = categories.find((c) => c.id === t.categoryId);

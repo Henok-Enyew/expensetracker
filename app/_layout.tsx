@@ -2,10 +2,12 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppLockScreen } from "@/components/AppLockScreen";
+import { useColors } from "@/contexts/ThemeContext";
 import { queryClient } from "@/lib/query-client";
 import { AppProvider } from "@/contexts/AppContext";
 import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
@@ -72,7 +74,15 @@ function RootLayoutNav() {
 
 function LockGate({ children }: { children: React.ReactNode }) {
   const { appLockEnabled, locked, isLoading } = useSecurity();
-  if (!appLockEnabled || isLoading) return <>{children}</>;
+  const c = useColors();
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: c.background }}>
+        <ActivityIndicator size="large" color={c.primary} />
+      </View>
+    );
+  }
+  if (!appLockEnabled) return <>{children}</>;
   if (locked) return <AppLockScreen />;
   return <>{children}</>;
 }
