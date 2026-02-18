@@ -1,270 +1,234 @@
-# Birr Track
+<p align="center">
+  <img src="./assets/images/icon.png" alt="Birr Track" width="120" height="120" />
+</p>
 
-**A modern expense tracker built for Ethiopian users** — track spending, manage bank accounts, import SMS transactions, monitor loans & debts, and visualize your finances with animated analytics.
+<h1 align="center">Birr Track</h1>
+<p align="center">
+  <strong>A modern expense tracker built for Ethiopian users</strong>
+</p>
+<p align="center">
+  Track spending, manage bank accounts, import SMS transactions, monitor loans & debts, and visualize your finances with animated analytics.
+</p>
 
-Built with React Native + Expo (SDK 54), TypeScript, and local-first storage.
+<p align="center">
+  <img src="https://img.shields.io/badge/React%20Native-0.81-61dafb?style=flat-square&logo=react" alt="React Native" />
+  <img src="https://img.shields.io/badge/Expo-SDK%2054-000020?style=flat-square&logo=expo" alt="Expo" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Platform-Android-3ddc84?style=flat-square&logo=android" alt="Android" />
+</p>
 
 ---
 
-## Features
+## ✨ Features
 
-### Core
+### 💰 Core
 
-- **Transaction Management** — Add income and expenses manually, categorize them (14 built-in categories), and choose payment methods.
+- **Transaction Management** — Add income and expenses manually, categorize them (14+ built-in categories), and choose payment methods.
 - **Bank Accounts** — Link multiple Ethiopian bank accounts (CBE, Telebirr, Awash, Dashen, BOA, Abay, Amhara, and more). View balances and per-bank transaction history.
-- **Budget Tracking** — Set monthly budgets per category with real-time progress bars showing spending vs. limit.
+- **Budget Tracking** — Set daily, weekly, monthly, or yearly budgets per category. Fixed-size period tabs (Daily / Weekly / Monthly / Yearly) with budget count; real-time progress bars for spending vs. limit.
 - **Friends & Loans** — Track money lent and borrowed per friend. Add photos, phone numbers, and notes. See net balance per friend at a glance.
 
-### SMS Integration (Android)
+### 📱 Home & Privacy
 
-- **Automatic Inbox Scanning** — Tap "Scan & Import" on any bank detail screen to read your SMS inbox, automatically parse bank transaction messages, create transactions, and update your balance.
-- **Real-Time Listener** — Enable auto-import per bank to catch new incoming SMS in real-time and import them as transactions instantly.
-- **Smart Parsing** — Custom parsers for CBE, Telebirr, and Bank of Abyssinia with a generic fallback for other banks. Handles credits, debits, transfers, fees, VAT, and balance extraction.
-- **Deduplication** — SMS-based transactions are deduped by both content hash and ID to prevent double-imports.
+- **Balance Overview** — Total balance, monthly income/expense, and net with friends on a gradient card.
+- **Hide/Show Amounts** — Tap the eye icon to hide or reveal all amounts (default: hidden with ••••••) for privacy on the home screen.
+- **Today’s Summary** — Quick view of today’s income and expense totals above recent transactions.
 
-### Analytics Dashboard
+### 📤 Export
 
-- **Contribution Heatmap** — GitHub-style daily activity grid. Green for net income days, red for net expense days, with intensity based on amount.
-- **Animated Bar Charts** — Income vs. expense breakdowns by time period (hourly, weekly, monthly) with spring-animated bars.
-- **Spending Flow Chart** — Animated line chart showing cumulative net spending/income trends over time.
-- **Quick Insights** — Saving streak, average daily spending, best saving day, and today's transaction count.
-- **Period Selector** — Switch between daily, monthly, and yearly views across all charts and metrics.
+- **PDF Export** — Export all transactions as a **PDF file** (not CSV). Includes:
+  - **Birr Track** logo and title in a styled header
+  - Summary cards: Total Balance, Net (incl. friends), Transaction count, Total Income, Total Expense
+  - Full transactions table (Date, Type, Amount, Category, Description, Payment)
+  - Same summary repeated in the footer
+  Share or save the PDF from the app (expo-print + expo-sharing).
 
-### Security
+### 📲 SMS Integration (Android)
 
-- **App Lock** — Lock the app with biometric authentication (fingerprint/face) or a 4–6 digit PIN.
-- **Background Lock** — Automatically locks when the app goes to the background; requires authentication on return.
-- **Smart Suppression** — Lock is temporarily suppressed during in-app actions like image picking so it doesn't interrupt the user.
+- **Automatic Inbox Scanning** — Tap “Scan & Import” on any bank detail screen to read your SMS inbox, parse bank messages, create transactions, and update balances.
+- **Real-Time Listener** — Enable auto-import per bank to catch new SMS and import them as transactions instantly.
+- **Smart Parsing** — Custom parsers for CBE, Telebirr, and Bank of Abyssinia with a generic fallback. Handles credits, debits, transfers, fees, VAT, and balance extraction.
+- **Deduplication** — SMS-based transactions are deduped by content hash and ID to prevent double-imports.
 
-### Design
+### 📊 Analytics Dashboard
 
-- **Dark & Light Mode** — Full theme support with a custom purple-toned palette (`#45234E`, `#927C9C`, `#C2B5BF`, `#E7DBE9`). Follows system preference or manual toggle.
-- **Rubik Font Family** — Clean, modern typography throughout (Regular, Medium, SemiBold, Bold).
-- **Outlined Icon System** — Ionicons with outlined/filled states for navigation and UI elements.
-- **Subtle Card Design** — Color-coded cards with tinted backgrounds and soft borders (green for income, red for expense, bank brand colors).
+- **Contribution Heatmap** — GitHub-style daily activity grid. Green for net income days, red for net expense days, with intensity by amount.
+- **Animated Bar Charts** — Income vs. expense by time period (hourly, weekly, monthly) with spring-animated bars.
+- **Spending Flow Chart** — Animated line chart for cumulative net spending/income over time.
+- **Quick Insights** — Saving streak, average daily spending, best saving day, and today’s transaction count.
+- **Period Selector** — Switch between daily, monthly, and yearly views.
+
+### 🔒 Security
+
+- **App Lock** — Lock the app with biometrics (fingerprint/face) or a 4–6 digit PIN.
+- **Background Lock** — Locks when the app goes to the background; shows lock screen again when you return (no bypass from cache).
+- **Loading Gate** — Security state loads before showing the main app, so the lock screen is never skipped on cold start.
+- **Smart Suppression** — Lock is temporarily suppressed during in-app actions (e.g. image picking) so it doesn’t interrupt the flow.
+
+### 🎨 Design
+
+- **Dark & Light Mode** — Full theme support with a custom purple palette (`#45234E`, `#927C9C`, `#C2B5BF`, `#E7DBE9`). System preference or manual toggle.
+- **Rubik Font** — Clean typography (Regular, Medium, SemiBold, Bold).
+- **Ionicons** — Outlined/filled icon system for navigation and UI.
+- **Card Design** — Color-coded cards (green income, red expense, bank brand colors) with soft borders.
 
 ---
 
-## Tech Stack
+## 🛠 Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | React Native 0.81 + Expo SDK 54 |
-| Language | TypeScript 5.9 |
-| Navigation | Expo Router (file-based, tab layout) |
-| Storage | AsyncStorage (local-first, no backend required) |
-| Animations | React Native Reanimated 4 + React Native SVG |
-| Auth | expo-local-authentication (biometric) + expo-secure-store (PIN) |
-| SMS | Custom Expo native module (`modules/sms-inbox`) — inbox reading + real-time BroadcastReceiver |
-| Fonts | `@expo-google-fonts/rubik` |
-| Icons | `@expo/vector-icons` (Ionicons) |
+| Layer       | Technology                                                                 |
+|------------|-----------------------------------------------------------------------------|
+| Framework  | React Native 0.81 + Expo SDK 54                                            |
+| Language   | TypeScript 5.9                                                             |
+| Navigation | Expo Router (file-based, tab layout)                                       |
+| Storage    | AsyncStorage (local-first, no backend required)                            |
+| Animations | React Native Reanimated 4 + React Native SVG                                |
+| Auth       | expo-local-authentication (biometric) + expo-secure-store (PIN)           |
+| PDF Export| expo-print (HTML → PDF) + expo-sharing                                     |
+| SMS        | Custom Expo native module (`modules/sms-inbox`) — inbox + BroadcastReceiver |
+| Fonts      | `@expo-google-fonts/rubik`                                                 |
+| Icons      | `@expo/vector-icons` (Ionicons)                                            |
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 app/
-  _layout.tsx                 # Root layout, font loading, global providers
+  _layout.tsx                 # Root layout, font loading, providers, lock gate
   (tabs)/
     _layout.tsx               # Tab bar configuration
-    index.tsx                 # Home — balance card, recent transactions, bank accounts
+    index.tsx                 # Home — balance card, today summary, recent transactions
     transactions.tsx          # Full transaction list with filters
     analytics.tsx             # Charts, heatmap, insights dashboard
-    budget.tsx                # Budget overview and progress bars
+    budget.tsx                # Budget overview, period tabs, progress bars
     friends.tsx               # Friends/loans list
-    settings.tsx              # Theme, security, SMS permissions, export
+    settings.tsx              # Theme, security, SMS, PDF export
   add-transaction.tsx         # Add/edit transaction form
   add-bank.tsx                # Add bank account
-  bank-detail.tsx             # Bank detail — SMS scan & import, transaction list
+  bank-detail.tsx             # Bank detail — SMS scan & import
   add-budget.tsx              # Add/edit budget
   add-friend.tsx              # Add friend with photo
   friend-detail.tsx           # Friend detail — loan history
+  about.tsx                   # About — app info, developer intro
 
 components/
-  BalanceCard.tsx             # Gradient overview card (income, expense, balance)
+  BalanceCard.tsx             # Gradient card (balance, income, expense, hide/show)
   TransactionItem.tsx         # Single transaction row
   BankAccountCard.tsx         # Bank account summary card
-  PieChart.tsx                # Category breakdown pie chart
   BudgetProgressBar.tsx       # Budget usage bar
   CategoryPicker.tsx          # Category selection grid
-  ContributionHeatmap.tsx     # GitHub-style daily activity heatmap
-  AnimatedBarChart.tsx        # Animated income vs. expense bars
-  SpendingFlowChart.tsx       # Animated cumulative line chart
-  SpendingStreakCard.tsx      # Quick insight cards with animations
-  AppLockScreen.tsx           # Biometric/PIN lock overlay
-  SmsListenerProvider.tsx     # Global SMS listener mount point
+  ContributionHeatmap.tsx    # Daily activity heatmap
+  AnimatedBarChart.tsx       # Animated income vs expense bars
+  SpendingFlowChart.tsx      # Cumulative line chart
+  SpendingStreakCard.tsx     # Quick insight cards
+  AppLockScreen.tsx          # Biometric/PIN lock overlay
+  SmsListenerProvider.tsx    # Global SMS listener
 
 contexts/
-  AppContext.tsx               # Global state: transactions, banks, budgets, categories
-  ThemeContext.tsx              # Theme mode, color palette, dark/light colors
-  SecurityContext.tsx           # App lock state, biometric, PIN, suppress logic
-
-hooks/
-  useSmsPermission.ts          # Android SMS permission management
-  useSmsListener.ts            # Global SMS listener lifecycle
+  AppContext.tsx              # Global state: transactions, banks, budgets, categories
+  ThemeContext.tsx            # Theme mode, color palette
+  SecurityContext.tsx         # App lock, biometric, PIN, resume lock
 
 lib/
-  types.ts                     # TypeScript interfaces (Transaction, BankAccount, Budget, Friend, etc.)
-  storage.ts                   # AsyncStorage CRUD operations, dedup tracking
-  utils.ts                     # Currency formatting, date helpers, ID generation
-  security.ts                  # PIN hashing, secure storage operations
-  query-client.ts              # TanStack Query client
-  sms/
-    parser.ts                  # Per-bank SMS parsers (CBE, Telebirr, BOA, generic)
-    sync.ts                    # SMS → Transaction creation, balance updates, dedup
-    listener.ts                # Real-time SMS listener (Android)
-    service.ts                 # SMS orchestration, permission checks
-    inbox.ts                   # Inbox scanner — bulk read, parse, sync
+  types.ts                    # Transaction, BankAccount, Budget, Friend, etc.
+  storage.ts                  # AsyncStorage CRUD, dedup tracking
+  utils.ts                    # Currency, dates, ID generation
+  security.ts                 # PIN hashing, secure storage
+  pdfExport.ts                # PDF HTML builder (logo, summary, table)
+  query-client.ts             # TanStack Query client
+  sms/                        # Parsers, sync, listener, inbox
 
 modules/
-  sms-inbox/                   # Local Expo native module
-    index.ts                   # JS interface
-    expo-module.config.json    # Module config
-    android/
-      build.gradle
-      src/main/java/.../SmsInboxModule.kt   # Android ContentResolver SMS reader
-
-constants/
-  banks.ts                     # Bank definitions (14 Ethiopian banks with logos/colors)
-  categories.ts                # Default expense/income categories
-  colors.ts                    # Static color fallbacks
-  smsBankShortcodes.ts         # Bank SMS sender IDs and shortcode mappings
+  sms-inbox/                  # Expo native module (Android SMS reader)
 ```
 
 ---
 
-## Supported Banks
+## 🏦 Supported Banks
 
-| Bank | SMS Parser | Logo |
-|------|-----------|------|
-| Commercial Bank of Ethiopia (CBE) | Custom | Yes |
-| Telebirr (Ethio Telecom) | Custom | Yes |
-| Bank of Abyssinia (BOA) | Custom | Yes |
-| Awash Bank | Generic | Yes |
-| Dashen Bank | Generic | Yes |
-| Abay Bank | Generic | Yes |
-| Amhara Bank | Generic | Yes |
-| Cooperative Bank of Oromia | Generic | — |
-| Nib International Bank | Generic | — |
-| Wegagen Bank | Generic | — |
-| United Bank | Generic | — |
-| Bunna International Bank | Generic | — |
-| M-Pesa | Generic | — |
-| Enat Bank | Generic | — |
+| Bank                          | SMS Parser | Logo |
+|-------------------------------|------------|------|
+| Commercial Bank of Ethiopia   | Custom     | Yes  |
+| Telebirr (Ethio Telecom)      | Custom     | Yes  |
+| Bank of Abyssinia             | Custom     | Yes  |
+| Awash, Dashen, Abay, Amhara   | Generic    | Yes  |
+| Cooperative Bank of Oromia, Nib, Wegagen, United, Bunna, M-Pesa, Enat | Generic | — |
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Node.js** 18+ and npm
-- **Android SDK** (API 24+) with platform-tools
-- **Java JDK** 17+
-- A physical Android device or emulator
+- **Node.js** 18+ and npm  
+- **Android SDK** (API 24+) with platform-tools  
+- **Java JDK** 17+  
+- Physical Android device or emulator  
 
-### Installation
+### Install & run
 
 ```bash
-# Clone the repository
 git clone <repo-url>
 cd "Expense tracker"
-
-# Install dependencies
 npm install
+npx expo run:android
 ```
 
-### Running on Android (Physical Device)
-
-1. **Enable Developer Options** on your phone:
-   - Go to Settings > About Phone > tap "Build Number" 7 times
-
-2. **Enable USB Debugging**:
-   - Settings > Developer Options > USB Debugging > ON
-
-3. **Connect via USB** and verify:
-   ```bash
-   adb devices
-   # Should show your device listed
-   ```
-
-4. **Run the app**:
-   ```bash
-   npx expo run:android
-   ```
-   This generates the native Android project (if needed) and installs the app on your device.
-
-### Running with Expo Dev Client
+### Run with Expo Dev Client
 
 ```bash
 npx expo start --dev-client
 ```
 
-### Building for Production (EAS)
+### Build for production (EAS)
 
 ```bash
-# Install EAS CLI
 npm install -g eas-cli
-
-# Build APK
-eas build --platform android --profile preview
+eas build --platform android --profile production   # AAB for Play Store
+eas build --platform android --profile preview      # APK for testing
 ```
+
+Release output:
+
+- **AAB:** Download from [expo.dev](https://expo.dev) → your project → Builds (for Play Store).
+- **APK (local):** `npx expo run:android --variant release` → `android/app/build/outputs/apk/release/app-release.apk`.
 
 ---
 
-## Environment Setup (Fedora / Linux)
+## 🌍 Environment (Fedora / Linux)
 
 ```bash
-# Install Java JDK
 sudo dnf install java-17-openjdk-devel
+# Android SDK: https://developer.android.com/studio#command-tools
 
-# Download Android SDK command-line tools
-# https://developer.android.com/studio#command-tools
-
-# Set environment variables (add to ~/.bashrc or ~/.zshrc)
 export ANDROID_HOME=$HOME/Android/Sdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-export PATH=$PATH:$ANDROID_HOME/emulator
-
-# Accept licenses
+export PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator
 sdkmanager --licenses
-
-# Install required SDK components
 sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 ```
 
 ---
 
-## SMS Import Flow
+## 📄 SMS Import Flow
 
 ```
-User taps "Scan & Import" on Bank Detail screen
-  │
-  ├─ Check READ_SMS permission (request if needed)
-  │
-  ├─ Read SMS from device inbox (via SmsInbox native module)
-  │   └─ Filters by date (since last sync or 90 days)
-  │
-  ├─ Filter SMS by bank sender address
-  │   ├─ Known bank senders (e.g. "CBE", "Telebirr")
-  │   └─ Shared shortcodes (e.g. "8990") → auto-detect bank from body
-  │
-  ├─ Parse each SMS with bank-specific parser
-  │   ├─ Extract: direction, amount, fees, balance, date, description
-  │   └─ Generate unique SMS ID for deduplication
-  │
-  ├─ Create Transaction records (with body-hash + ID-based dedup)
-  │   ├─ Main transaction (income/expense)
-  │   └─ Fee transaction (if service charge + VAT present)
-  │
-  ├─ Update bank account balance (from latest SMS balance)
-  │
-  └─ Display result summary
+User taps "Scan & Import" on Bank Detail
+  → Check READ_SMS permission
+  → Read inbox (SmsInbox module), filter by bank senders
+  → Parse with bank-specific or generic parser
+  → Create transactions (dedup by hash + ID), update balance
+  → Show result summary
 ```
 
 ---
 
-## License
+## 👤 About
 
-Private project. All rights reserved.
+**Birr Track** is built by **Henok Enyew** (Software Engineer). For bug reports and feature requests, reach out via [henokenyew.me](https://henokenyew.me).
+
+---
+
+<p align="center">
+  <strong>© 2026 Ethiopia. All rights reserved.</strong>
+</p>
