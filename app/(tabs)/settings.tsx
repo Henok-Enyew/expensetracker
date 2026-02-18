@@ -17,12 +17,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
+import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
+import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { useApp } from "@/contexts/AppContext";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
-import { exportTransactionsCSV } from "@/lib/storage";
+import { buildTransactionsPdfHtml } from "@/lib/pdfExport";
 import { useTheme, useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
 
@@ -62,7 +64,7 @@ function SettingItem({ icon, iconFamily = "Ionicons", label, subtitle, onPress, 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
-  const { transactions, categories, refreshData } = useApp();
+  const { transactions, categories, totalBalance, overallNetBalance, refreshData } = useApp();
   const {
     hasPermission: smsPermission,
     checking: smsChecking,
@@ -187,36 +189,60 @@ export default function SettingsScreen() {
     }
     setExporting(true);
     try {
-      const csv = await exportTransactionsCSV(transactions, categories);
+      const totalIncome = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+      const totalExpense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+      let logoBase64: string | null = null;
+      try {
+        const asset = Asset.fromModule(require("@/assets/images/icon.png"));
+        await asset.downloadAsync();
+        if (asset.localUri) {
+          logoBase64 = await FileSystem.readAsStringAsync(asset.localUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+        }
+      } catch {
+        // Logo optional; PDF still works without it
+      }
+      const html = buildTransactionsPdfHtml(
+        {
+          transactions,
+          categories,
+          totalBalance,
+          overallNetBalance,
+          totalIncome,
+          totalExpense,
+        },
+        logoBase64,
+      );
       if (Platform.OS === "web") {
-        const blob = new Blob([csv], { type: "text/csv" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "birr-track-transactions.csv";
-        a.click();
-        URL.revokeObjectURL(url);
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.write(html);
+          win.document.close();
+          Alert.alert("Export", "Use your browser’s Print (Ctrl+P / Cmd+P) and choose “Save as PDF” to download.");
+        } else {
+          Alert.alert("Export Failed", "Please allow pop-ups and try again.");
+        }
       } else {
-        const filename = `birr-track-transactions-${Date.now()}.csv`;
-        const path = `${FileSystem.cacheDirectory}${filename}`;
-        await FileSystem.writeAsStringAsync(path, csv, {
-          encoding: FileSystem.EncodingType.UTF8,
-        });
+        const { uri } = await Print.printToFileAsync({ html });
         const canShare = await Sharing.isAvailableAsync();
         if (canShare) {
-          await Sharing.shareAsync(path, {
-            mimeType: "text/csv",
-            dialogTitle: "Export transactions as CSV file",
+          await Sharing.shareAsync(uri, {
+            mimeType: "application/pdf",
+            dialogTitle: "Export transactions as PDF",
           });
         } else {
           await Share.share({
-            message: csv,
+            url: uri,
+            type: "application/pdf",
             title: "Birr Track Transactions",
+            message: "Transactions export (PDF)",
           });
         }
       }
     } catch (e) {
-      Alert.alert("Export Failed", "Could not export transactions.");
+      const msg = e instanceof Error ? e.message : "Could not export transactions.";
+      Alert.alert("Export Failed", msg);
     } finally {
       setExporting(false);
     }
@@ -322,7 +348,7 @@ export default function SettingsScreen() {
           <SettingItem
             icon="download-outline"
             label="Export Transactions"
-            subtitle="Export as CSV file"
+            subtitle="Export as PDF file"
             onPress={handleExport}
             colors={c}
           />

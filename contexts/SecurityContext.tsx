@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
-import { AppState, AppStateStatus, Platform } from "react-native";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from "react";
+import { AppState, AppStateStatus } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as security from "@/lib/security";
 
@@ -56,17 +56,20 @@ export function SecurityProvider({ children }: { children: ReactNode }) {
     loadSecurityState();
   }, [loadSecurityState]);
 
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+
   useEffect(() => {
     if (!appLockEnabled) return;
-    let prevState = AppState.currentState;
+    appStateRef.current = AppState.currentState;
     const sub = AppState.addEventListener("change", (nextState: AppStateStatus) => {
+      const prev = appStateRef.current;
+      appStateRef.current = nextState;
       if ((nextState === "background" || nextState === "inactive") && !suppressRef.current) {
         setLocked(true);
       }
-      if (nextState === "active" && (prevState === "background" || prevState === "inactive")) {
+      if (nextState === "active" && (prev === "background" || prev === "inactive")) {
         if (!suppressRef.current) setLocked(true);
       }
-      prevState = nextState;
     });
     return () => sub.remove();
   }, [appLockEnabled]);

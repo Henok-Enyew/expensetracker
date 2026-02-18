@@ -265,11 +265,12 @@ export default function HomeScreen() {
                   color={Colors.income}
                 />
                 <Text style={[styles.todayStatText, { color: c.text }]}>
-                  +ETB{" "}
-                  {todayTxns
-                    .filter((t) => t.type === "income")
-                    .reduce((s, t) => s + t.amount, 0)
-                    .toLocaleString()}
+                  {amountsVisible
+                    ? `+ETB ${todayTxns
+                        .filter((t) => t.type === "income")
+                        .reduce((s, t) => s + t.amount, 0)
+                        .toLocaleString()}`
+                    : "••••••"}
                 </Text>
               </View>
               <View style={styles.todayStat}>
@@ -279,11 +280,12 @@ export default function HomeScreen() {
                   color={Colors.expense}
                 />
                 <Text style={[styles.todayStatText, { color: c.text }]}>
-                  -ETB{" "}
-                  {todayTxns
-                    .filter((t) => t.type === "expense")
-                    .reduce((s, t) => s + t.amount, 0)
-                    .toLocaleString()}
+                  {amountsVisible
+                    ? `-ETB ${todayTxns
+                        .filter((t) => t.type === "expense")
+                        .reduce((s, t) => s + t.amount, 0)
+                        .toLocaleString()}`
+                    : "••••••"}
                 </Text>
               </View>
             </View>

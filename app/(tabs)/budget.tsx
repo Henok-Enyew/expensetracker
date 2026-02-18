@@ -161,10 +161,10 @@ export default function BudgetScreen() {
               <View style={styles.periodChipLabelRow}>
                 <Ionicons
                   name={PERIOD_ICONS[p] as any}
-                  size={16}
+                  size={18}
                   color={active ? c.primary : c.textTertiary}
                 />
-                <Text style={[styles.periodText, { color: c.textSecondary }, active && { color: c.primary, fontFamily: "Rubik_600SemiBold" }]}>
+                <Text numberOfLines={1} style={[styles.periodText, { color: c.textSecondary }, active && { color: c.primary, fontFamily: "Rubik_600SemiBold" }]}>
                   {getPeriodLabel(p)}
                 </Text>
               </View>
@@ -301,31 +301,32 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   periodChip: {
+    minWidth: 72,
+    width: 72,
+    height: 64,
+    paddingHorizontal: 4,
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 76,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1.5,
-    gap: 4,
+    gap: 2,
   },
   periodChipLabelRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
   },
   periodText: {
-    fontSize: 13,
+    fontSize: 11,
     fontFamily: "Rubik_500Medium",
   },
   periodChipCountRow: {
-    minHeight: 16,
+    height: 14,
     alignItems: "center",
     justifyContent: "center",
   },
   periodCountText: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: "Rubik_600SemiBold",
   },
   dateLabel: {

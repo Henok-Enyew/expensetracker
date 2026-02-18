@@ -31,6 +31,9 @@ export default function AboutScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
+        <Text style={[styles.introLine, { color: c.text }]}>
+          Hi there I am Henok Enyew, Software Engineer.
+        </Text>
         <View style={[styles.logoCard, { backgroundColor: c.primary + "10", borderColor: c.primary + "25" }]}>
           <Image
             source={require("@/assets/images/icon.png")}
@@ -43,9 +46,6 @@ export default function AboutScreen() {
 
         <View style={[styles.messageCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
           <Text style={[styles.messageText, { color: c.text }]}>
-            Hi there I am Henok Enyew, Software Engineer.
-          </Text>
-          <Text style={[styles.messageText, { color: c.text, marginTop: 16 }]}>
             I built this app because I couldn't find the perfect app for my needs to manage my expenses and to track my loans and debts with my friends.
           </Text>
           <Text style={[styles.messageText, { color: c.text, marginTop: 16 }]}>
@@ -95,6 +95,12 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingBottom: 60,
+  },
+  introLine: {
+    fontSize: 16,
+    fontFamily: "Rubik_500Medium",
+    marginTop: 8,
+    marginBottom: 4,
   },
   logoCard: {
     alignItems: "center",

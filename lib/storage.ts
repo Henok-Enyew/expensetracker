@@ -248,14 +248,17 @@ export async function setThemeMode(mode: ThemeMode): Promise<void> {
 
 // --- Export ---
 
+/** CSV content with UTF-8 BOM so Excel opens it correctly. */
 export async function exportTransactionsCSV(
   txns: Transaction[],
   categories: Category[],
 ): Promise<string> {
+  const BOM = "\uFEFF";
   const header = "Date,Type,Amount (ETB),Category,Description,Payment Method\n";
+  const escape = (v: string) => (v.includes(",") || v.includes('"') || v.includes("\n") ? `"${v.replace(/"/g, '""')}"` : v);
   const rows = txns.map((t) => {
     const cat = categories.find((c) => c.id === t.categoryId);
-    return `${t.date},${t.type},${t.amount},${cat?.name || "Other"},${t.description.replace(/,/g, ";")},${t.paymentMethod}`;
+    return [t.date, t.type, t.amount, cat?.name || "Other", t.description, t.paymentMethod].map((cell) => escape(String(cell))).join(",");
   });
-  return header + rows.join("\n");
+  return BOM + header + rows.join("\n");
 }
