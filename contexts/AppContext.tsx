@@ -92,7 +92,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addTxn = useCallback(async (txn: Transaction) => {
     await storage.addTransaction(txn);
     setTransactions((prev) => [txn, ...prev]);
-  }, []);
+
+    // Auto-adjust cash balance for cash transactions
+    // Bank balances are managed by SMS sync, so we only touch cash here
+    if (txn.paymentMethod === "cash" && txn.source !== "bank_sms") {
+      const delta = txn.type === "income" ? txn.amount : -txn.amount;
+      const newCash = cashBalance + delta;
+      await storage.setCashBalance(newCash);
+      setCashBalanceState(newCash);
+    }
+  }, [cashBalance]);
 
   const updateTxn = useCallback(async (txn: Transaction) => {
     await storage.updateTransaction(txn);
@@ -100,9 +109,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const deleteTxn = useCallback(async (id: string) => {
+    const txn = transactions.find((t) => t.id === id);
     await storage.deleteTransaction(id);
     setTransactions((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+
+    // Reverse the cash adjustment if the deleted transaction was a cash transaction
+    if (txn && txn.paymentMethod === "cash" && txn.source !== "bank_sms") {
+      const reverseDelta = txn.type === "income" ? -txn.amount : txn.amount;
+      const newCash = cashBalance + reverseDelta;
+      await storage.setCashBalance(newCash);
+      setCashBalanceState(newCash);
+    }
+  }, [transactions, cashBalance]);
 
   // Bank accounts
   const addAccount = useCallback(async (account: BankAccount) => {

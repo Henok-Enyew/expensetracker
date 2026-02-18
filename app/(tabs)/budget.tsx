@@ -1,126 +1,276 @@
-import React, { useMemo } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Platform } from "react-native";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, Platform, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useApp } from "@/contexts/AppContext";
 import { useColors } from "@/contexts/ThemeContext";
 import { BudgetProgressBar } from "@/components/BudgetProgressBar";
-import { formatCurrency, getCurrentMonth, getMonthName } from "@/lib/utils";
+import { formatCurrencyShort, getPeriodDateRange, getPeriodLabel } from "@/lib/utils";
+import type { BudgetPeriod, Budget } from "@/lib/types";
 import Colors from "@/constants/colors";
+
+const PERIODS: BudgetPeriod[] = ["daily", "weekly", "monthly", "yearly"];
+const PERIOD_ICONS: Record<BudgetPeriod, string> = {
+  daily: "today-outline",
+  weekly: "calendar-outline",
+  monthly: "calendar",
+  yearly: "globe-outline",
+};
 
 export default function BudgetScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
-  const { budgets, transactions, categories } = useApp();
-  const currentMonth = getCurrentMonth();
+  const { budgets, transactions, categories, saveBudgets } = useApp();
+  const [selectedPeriod, setSelectedPeriod] = useState<BudgetPeriod>("monthly");
+  const alertedBudgets = useRef<Set<string>>(new Set());
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
-  const monthlyBudgets = useMemo(() => {
-    return budgets.filter((b) => b.month === currentMonth);
-  }, [budgets, currentMonth]);
+  const dateRange = useMemo(() => getPeriodDateRange(selectedPeriod), [selectedPeriod]);
+
+  const periodBudgets = useMemo(() => {
+    return budgets.filter((b) => b.period === selectedPeriod);
+  }, [budgets, selectedPeriod]);
+
+  const overallBudget = useMemo(() => {
+    return periodBudgets.find((b) => b.categoryId === null);
+  }, [periodBudgets]);
+
+  const categoryBudgets = useMemo(() => {
+    return periodBudgets.filter((b) => b.categoryId !== null);
+  }, [periodBudgets]);
+
+  const periodExpenses = useMemo(() => {
+    return transactions.filter(
+      (t) => t.type === "expense" && t.date >= dateRange.start && t.date <= dateRange.end,
+    );
+  }, [transactions, dateRange]);
+
+  const totalSpent = useMemo(() => {
+    return periodExpenses.reduce((s, t) => s + t.amount, 0);
+  }, [periodExpenses]);
 
   const spentByCategory = useMemo(() => {
-    const monthTxns = transactions.filter(
-      (t) => t.date.startsWith(currentMonth) && t.type === "expense",
-    );
     const map: Record<string, number> = {};
-    monthTxns.forEach((t) => {
+    periodExpenses.forEach((t) => {
       map[t.categoryId] = (map[t.categoryId] || 0) + t.amount;
     });
     return map;
-  }, [transactions, currentMonth]);
+  }, [periodExpenses]);
 
-  const totalBudget = monthlyBudgets.reduce((s, b) => s + b.amount, 0);
-  const totalSpent = Object.values(spentByCategory).reduce((s, v) => s + v, 0);
+  // Alerts at 80% and 100%
+  useEffect(() => {
+    const allBudgetsToCheck: { budget: Budget; spent: number; label: string }[] = [];
+
+    if (overallBudget) {
+      allBudgetsToCheck.push({
+        budget: overallBudget,
+        spent: totalSpent,
+        label: `overall ${getPeriodLabel(selectedPeriod).toLowerCase()}`,
+      });
+    }
+    for (const b of categoryBudgets) {
+      const cat = categories.find((ct) => ct.id === b.categoryId);
+      if (!cat) continue;
+      allBudgetsToCheck.push({
+        budget: b,
+        spent: spentByCategory[b.categoryId!] || 0,
+        label: `${cat.name} (${getPeriodLabel(selectedPeriod).toLowerCase()})`,
+      });
+    }
+
+    for (const { budget: b, spent, label } of allBudgetsToCheck) {
+      if (b.amount <= 0) continue;
+      const pct = spent / b.amount;
+      const key100 = `${b.id}_100`;
+      const key80 = `${b.id}_80`;
+
+      if (pct >= 1 && !alertedBudgets.current.has(key100)) {
+        alertedBudgets.current.add(key100);
+        alertedBudgets.current.add(key80);
+        Alert.alert(
+          "Over Budget!",
+          `You've exceeded your ${label} budget (${formatCurrencyShort(spent)} / ${formatCurrencyShort(b.amount)}).`,
+        );
+      } else if (pct >= 0.8 && pct < 1 && !alertedBudgets.current.has(key80)) {
+        alertedBudgets.current.add(key80);
+        Alert.alert(
+          "Budget Warning",
+          `You've used ${Math.round(pct * 100)}% of your ${label} budget.`,
+        );
+      }
+    }
+  }, [overallBudget, categoryBudgets, totalSpent, spentByCategory, selectedPeriod, categories]);
+
+  const handleDeleteBudget = (budget: Budget) => {
+    const cat = budget.categoryId ? categories.find((ct) => ct.id === budget.categoryId) : null;
+    const name = cat ? cat.name : "Overall";
+    Alert.alert(
+      "Delete Budget",
+      `Remove the ${getPeriodLabel(budget.period).toLowerCase()} budget for "${name}"?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => saveBudgets(budgets.filter((b) => b.id !== budget.id)),
+        },
+      ],
+    );
+  };
+
+  const handleEditBudget = (budget: Budget) => {
+    router.push({ pathname: "/add-budget", params: { editId: budget.id } });
+  };
+
+  const overallPct = overallBudget && overallBudget.amount > 0
+    ? Math.min((totalSpent / overallBudget.amount) * 100, 100)
+    : 0;
+  const overallBarColor = overallBudget
+    ? totalSpent > overallBudget.amount
+      ? c.expense
+      : totalSpent > overallBudget.amount * 0.8
+        ? "#F59E0B"
+        : c.primary
+    : c.primary;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + webTopInset, backgroundColor: c.background }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: c.text }]}>Budget</Text>
-        <Pressable onPress={() => router.push("/add-budget")}>
+        <Pressable onPress={() => router.push({ pathname: "/add-budget", params: { defaultPeriod: selectedPeriod } })}>
           <Ionicons name="add-circle-outline" size={28} color={c.primary} />
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        <Text style={[styles.monthLabel, { color: c.textSecondary }]}>{getMonthName(currentMonth)}</Text>
+      {/* Period Tabs */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.periodRow}>
+        {PERIODS.map((p) => {
+          const active = selectedPeriod === p;
+          const count = budgets.filter((b) => b.period === p).length;
+          return (
+            <Pressable
+              key={p}
+              onPress={() => setSelectedPeriod(p)}
+              style={[
+                styles.periodChip,
+                { backgroundColor: c.surfaceSecondary, borderColor: "transparent" },
+                active && { backgroundColor: c.primary + "12", borderColor: c.primary },
+              ]}
+            >
+              <Ionicons
+                name={PERIOD_ICONS[p] as any}
+                size={16}
+                color={active ? c.primary : c.textTertiary}
+              />
+              <Text style={[styles.periodText, { color: c.textSecondary }, active && { color: c.primary, fontFamily: "Rubik_600SemiBold" }]}>
+                {getPeriodLabel(p)}
+              </Text>
+              {count > 0 && (
+                <View style={[styles.periodBadge, { backgroundColor: active ? c.primary : c.textTertiary }]}>
+                  <Text style={styles.periodBadgeText}>{count}</Text>
+                </View>
+              )}
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
-        {monthlyBudgets.length > 0 && (
-          <View style={[styles.overviewCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}>
-            <View style={styles.overviewRow}>
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewLabel, { color: c.textSecondary }]}>Total Budget</Text>
-                <Text style={[styles.overviewValue, { color: c.text }]}>{formatCurrency(totalBudget)}</Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+        {/* Date range label */}
+        <Text style={[styles.dateLabel, { color: c.textTertiary }]}>{dateRange.label}</Text>
+
+        {/* Overall Budget Card */}
+        {overallBudget && (
+          <Pressable
+            style={[styles.overallCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}
+            onPress={() => handleEditBudget(overallBudget)}
+            onLongPress={() => handleDeleteBudget(overallBudget)}
+          >
+            <View style={styles.overallHeader}>
+              <View style={[styles.overallIconBg, { backgroundColor: c.primary + "15" }]}>
+                <Ionicons name="shield-checkmark-outline" size={24} color={c.primary} />
               </View>
-              <View style={[styles.overviewDivider, { backgroundColor: c.border }]} />
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewLabel, { color: c.textSecondary }]}>Spent</Text>
-                <Text style={[styles.overviewValue, { color: c.expense }]}>
-                  {formatCurrency(totalSpent)}
+              <View style={styles.overallInfo}>
+                <Text style={[styles.overallTitle, { color: c.text }]}>Overall {getPeriodLabel(selectedPeriod)} Budget</Text>
+                <Text style={[styles.overallSubtitle, { color: c.textSecondary }]}>
+                  {formatCurrencyShort(totalSpent)} spent of {formatCurrencyShort(overallBudget.amount)}
                 </Text>
               </View>
-              <View style={[styles.overviewDivider, { backgroundColor: c.border }]} />
-              <View style={styles.overviewItem}>
-                <Text style={[styles.overviewLabel, { color: c.textSecondary }]}>Remaining</Text>
-                <Text
-                  style={[
-                    styles.overviewValue,
-                    { color: totalBudget - totalSpent >= 0 ? c.income : c.expense },
-                  ]}
-                >
-                  {formatCurrency(Math.abs(totalBudget - totalSpent))}
+              <Text style={[styles.overallPct, { color: overallBarColor }]}>
+                {Math.round(overallBudget.amount > 0 ? (totalSpent / overallBudget.amount) * 100 : 0)}%
+              </Text>
+            </View>
+
+            <View style={[styles.overallTrack, { backgroundColor: c.surfaceTertiary }]}>
+              <View style={[styles.overallFill, { width: `${overallPct}%`, backgroundColor: overallBarColor }]} />
+            </View>
+
+            <View style={styles.overallStats}>
+              <View style={styles.overallStat}>
+                <Text style={[styles.statLabel, { color: c.textTertiary }]}>Budget</Text>
+                <Text style={[styles.statValue, { color: c.text }]}>{formatCurrencyShort(overallBudget.amount)}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: c.borderLight }]} />
+              <View style={styles.overallStat}>
+                <Text style={[styles.statLabel, { color: c.textTertiary }]}>Spent</Text>
+                <Text style={[styles.statValue, { color: c.expense }]}>{formatCurrencyShort(totalSpent)}</Text>
+              </View>
+              <View style={[styles.statDivider, { backgroundColor: c.borderLight }]} />
+              <View style={styles.overallStat}>
+                <Text style={[styles.statLabel, { color: c.textTertiary }]}>
+                  {totalSpent > overallBudget.amount ? "Over" : "Left"}
+                </Text>
+                <Text style={[styles.statValue, { color: totalSpent > overallBudget.amount ? c.expense : c.income }]}>
+                  {formatCurrencyShort(Math.abs(overallBudget.amount - totalSpent))}
                 </Text>
               </View>
             </View>
+          </Pressable>
+        )}
 
-            <View style={[styles.overviewBar, { backgroundColor: c.surfaceTertiary }]}>
-              <View
-                style={[
-                  styles.overviewBarFill,
-                  {
-                    width: `${Math.min((totalSpent / Math.max(totalBudget, 1)) * 100, 100)}%`,
-                    backgroundColor:
-                      totalSpent > totalBudget
-                        ? c.expense
-                        : totalSpent > totalBudget * 0.8
-                          ? "#F59E0B"
-                          : c.primary,
-                  },
-                ]}
-              />
+        {/* Category Budgets */}
+        {categoryBudgets.length > 0 && (
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: c.textTertiary }]}>CATEGORY BUDGETS</Text>
+            <View style={styles.budgetList}>
+              {categoryBudgets.map((b) => {
+                const cat = categories.find((ct) => ct.id === b.categoryId);
+                if (!cat) return null;
+                return (
+                  <BudgetProgressBar
+                    key={b.id}
+                    category={cat}
+                    spent={spentByCategory[b.categoryId!] || 0}
+                    budget={b.amount}
+                    onPress={() => handleEditBudget(b)}
+                    onLongPress={() => handleDeleteBudget(b)}
+                  />
+                );
+              })}
             </View>
           </View>
         )}
 
-        <View style={styles.budgetList}>
-          {monthlyBudgets.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="wallet-outline" size={48} color={c.textTertiary} />
-              <Text style={[styles.emptyTitle, { color: c.text }]}>No budgets set</Text>
-              <Text style={[styles.emptyText, { color: c.textSecondary }]}>
-                Set monthly budgets to track your spending limits
-              </Text>
-              <Pressable style={[styles.addButton, { backgroundColor: c.primary }]} onPress={() => router.push("/add-budget")}>
-                <Ionicons name="add" size={20} color={c.textInverse} />
-                <Text style={[styles.addButtonText, { color: c.textInverse }]}>Add Budget</Text>
-              </Pressable>
+        {/* Empty State */}
+        {periodBudgets.length === 0 && (
+          <View style={styles.emptyState}>
+            <View style={[styles.emptyIcon, { backgroundColor: c.primary + "12" }]}>
+              <Ionicons name="wallet-outline" size={40} color={c.primary} />
             </View>
-          ) : (
-            monthlyBudgets.map((b) => {
-              const cat = categories.find((c) => c.id === b.categoryId);
-              if (!cat) return null;
-              return (
-                <BudgetProgressBar
-                  key={b.id}
-                  category={cat}
-                  spent={spentByCategory[b.categoryId] || 0}
-                  budget={b.amount}
-                />
-              );
-            })
-          )}
-        </View>
+            <Text style={[styles.emptyTitle, { color: c.text }]}>No {getPeriodLabel(selectedPeriod).toLowerCase()} budgets</Text>
+            <Text style={[styles.emptyText, { color: c.textSecondary }]}>
+              Set a {getPeriodLabel(selectedPeriod).toLowerCase()} budget to track and control your spending
+            </Text>
+            <Pressable
+              style={[styles.addButton, { backgroundColor: c.primary }]}
+              onPress={() => router.push({ pathname: "/add-budget", params: { defaultPeriod: selectedPeriod } })}
+            >
+              <Ionicons name="add" size={20} color={c.textInverse} />
+              <Text style={[styles.addButtonText, { color: c.textInverse }]}>Add Budget</Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -137,75 +287,145 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   title: {
     fontSize: 26,
     fontFamily: "Rubik_700Bold",
     color: Colors.text,
   },
-  monthLabel: {
-    fontSize: 15,
-    fontFamily: "Rubik_500Medium",
-    color: Colors.textSecondary,
+  periodRow: {
+    flexDirection: "row",
+    gap: 8,
     paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingVertical: 10,
   },
-  overviewCard: {
+  periodChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  periodText: {
+    fontSize: 13,
+    fontFamily: "Rubik_500Medium",
+  },
+  periodBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  periodBadgeText: {
+    fontSize: 10,
+    fontFamily: "Rubik_700Bold",
+    color: "#FFFFFF",
+  },
+  dateLabel: {
+    fontSize: 13,
+    fontFamily: "Rubik_400Regular",
+    paddingHorizontal: 20,
+    marginBottom: 14,
+  },
+  overallCard: {
     marginHorizontal: 20,
-    backgroundColor: Colors.surface,
     borderRadius: 16,
-    padding: 20,
-    gap: 16,
+    padding: 18,
+    gap: 14,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
     marginBottom: 20,
   },
-  overviewRow: {
+  overallHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  overallIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  overallInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  overallTitle: {
+    fontSize: 15,
+    fontFamily: "Rubik_600SemiBold",
+  },
+  overallSubtitle: {
+    fontSize: 12,
+    fontFamily: "Rubik_400Regular",
+  },
+  overallPct: {
+    fontSize: 20,
+    fontFamily: "Rubik_700Bold",
+  },
+  overallTrack: {
+    height: 10,
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  overallFill: {
+    height: 10,
+    borderRadius: 5,
+  },
+  overallStats: {
     flexDirection: "row",
     alignItems: "center",
   },
-  overviewItem: {
+  overallStat: {
     flex: 1,
     alignItems: "center",
-    gap: 4,
+    gap: 2,
   },
-  overviewDivider: {
+  statDivider: {
     width: 1,
-    height: 30,
-    backgroundColor: Colors.border,
+    height: 28,
   },
-  overviewLabel: {
+  statLabel: {
     fontSize: 11,
-    fontFamily: "Rubik_500Medium",
-    color: Colors.textSecondary,
+    fontFamily: "Rubik_400Regular",
   },
-  overviewValue: {
-    fontSize: 15,
+  statValue: {
+    fontSize: 14,
     fontFamily: "Rubik_700Bold",
-    color: Colors.text,
   },
-  overviewBar: {
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: Colors.surfaceTertiary,
-    overflow: "hidden",
+  section: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
-  overviewBarFill: {
-    height: 8,
-    borderRadius: 4,
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: "Rubik_600SemiBold",
+    letterSpacing: 0.5,
+    marginBottom: 10,
   },
   budgetList: {
-    paddingHorizontal: 20,
-    gap: 12,
+    gap: 10,
   },
   emptyState: {
     alignItems: "center",
     paddingVertical: 48,
-    gap: 8,
+    paddingHorizontal: 40,
+    gap: 10,
+  },
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
   },
   emptyTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontFamily: "Rubik_600SemiBold",
     color: Colors.text,
   },
@@ -214,6 +434,7 @@ const styles = StyleSheet.create({
     fontFamily: "Rubik_400Regular",
     color: Colors.textSecondary,
     textAlign: "center",
+    lineHeight: 20,
   },
   addButton: {
     flexDirection: "row",

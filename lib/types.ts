@@ -33,11 +33,16 @@ export interface BankAccount {
   lastSmsSyncAt?: string;
 }
 
+export type BudgetPeriod = "daily" | "weekly" | "monthly" | "yearly";
+
 export interface Budget {
   id: string;
-  categoryId: string;
+  categoryId: string | null;
   amount: number;
-  month: string;
+  period: BudgetPeriod;
+  createdAt: string;
+  /** @deprecated kept for migration from old format */
+  month?: string;
 }
 
 export type Period = "daily" | "monthly" | "yearly";

@@ -1,16 +1,18 @@
 import { useEffect, useRef, useCallback } from "react";
-import { Platform, AppState } from "react-native";
-import { startSmsListener, stopSmsListener, setSmsImportedCallback } from "@/lib/sms";
+import { Platform, AppState, PermissionsAndroid } from "react-native";
+import { startSmsListener, stopSmsListener, setSmsImportedCallback, readAndSyncBankSms } from "@/lib/sms";
 import { useApp } from "@/contexts/AppContext";
 import * as storage from "@/lib/storage";
 
 /**
- * Global hook that starts the SMS listener when any bank has sync enabled.
- * Should be mounted once near the root of the app.
+ * Global hook that starts the SMS listener when any bank has sync enabled,
+ * and auto-syncs all enabled banks on app startup to catch SMS received
+ * while the app was closed.
  */
 export function useSmsListener() {
-  const { refreshData, bankAccounts } = useApp();
+  const { refreshData, bankAccounts, isLoading } = useApp();
   const listenerStarted = useRef(false);
+  const autoSyncDone = useRef(false);
 
   const hasSyncEnabled = bankAccounts.some((a) => a.smsSyncEnabled);
 
@@ -18,8 +20,6 @@ export function useSmsListener() {
     if (Platform.OS !== "android") return;
     if (listenerStarted.current) return;
 
-    // Check if any bank has sync enabled (from storage, not just state,
-    // to handle first-load race conditions)
     let shouldStart = hasSyncEnabled;
     if (!shouldStart) {
       const accounts = await storage.getBankAccounts();
@@ -34,6 +34,43 @@ export function useSmsListener() {
     }
   }, [hasSyncEnabled]);
 
+  // Auto-sync: scan the inbox for each sync-enabled bank once on startup.
+  // This catches any SMS that arrived while the app was closed.
+  const runAutoSync = useCallback(async () => {
+    if (Platform.OS !== "android") return;
+    if (autoSyncDone.current) return;
+    autoSyncDone.current = true;
+
+    try {
+      const granted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_SMS);
+      if (!granted) return;
+
+      const accounts = await storage.getBankAccounts();
+      const syncEnabled = accounts.filter((a) => a.smsSyncEnabled);
+      if (syncEnabled.length === 0) return;
+
+      let anyImported = false;
+      for (const account of syncEnabled) {
+        try {
+          const result = await readAndSyncBankSms(
+            account.bankId,
+            account.id,
+            account.lastSmsSyncAt,
+          );
+          if (result.imported > 0) anyImported = true;
+        } catch (e) {
+          console.warn(`[AutoSync] Failed for ${account.bankId}:`, e);
+        }
+      }
+
+      if (anyImported) {
+        await refreshData();
+      }
+    } catch (e) {
+      console.warn("[AutoSync] Error:", e);
+    }
+  }, [refreshData]);
+
   // Set the import callback so the listener triggers refreshData
   useEffect(() => {
     setSmsImportedCallback(refreshData);
@@ -46,6 +83,13 @@ export function useSmsListener() {
       startListener();
     }
   }, [hasSyncEnabled, startListener]);
+
+  // Run auto-sync once after initial data load completes
+  useEffect(() => {
+    if (!isLoading && hasSyncEnabled && !autoSyncDone.current) {
+      runAutoSync();
+    }
+  }, [isLoading, hasSyncEnabled, runAutoSync]);
 
   // Restart listener when app comes to foreground (in case it was killed)
   useEffect(() => {

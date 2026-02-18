@@ -21,23 +21,46 @@ import { generateId } from "@/lib/utils";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
 import Colors from "@/constants/colors";
 
+const CASH_OPTION_ID = "__cash__";
+
 export default function AddBankScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
-  const { addBankAccount } = useApp();
+  const { addBankAccount, setCashBalance: setCash, cashBalance } = useApp();
   const { hasPermission, isAndroid, request: requestSmsPermission } = useSmsPermission();
   const [selectedBank, setSelectedBank] = useState<BankInfo | null>(null);
+  const [isCashSelected, setIsCashSelected] = useState(false);
   const [accountName, setAccountName] = useState("");
   const [balance, setBalance] = useState("");
   const [enableSmsSync, setEnableSmsSync] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const handleSelectCash = () => {
+    setSelectedBank(null);
+    setIsCashSelected(true);
+    setBalance(cashBalance > 0 ? cashBalance.toString() : "");
+    setEnableSmsSync(false);
+  };
+
+  const handleSelectBank = (bank: BankInfo) => {
+    setIsCashSelected(false);
+    setSelectedBank(bank);
+  };
+
   const handleSave = async () => {
-    if (!selectedBank) return;
+    if (!isCashSelected && !selectedBank) return;
     const numBalance = parseFloat(balance) || 0;
 
     setSaving(true);
     try {
+      if (isCashSelected) {
+        await setCash(numBalance);
+        if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        router.back();
+        return;
+      }
+
+      if (!selectedBank) return;
       const accountId = generateId();
       await addBankAccount({
         id: accountId,
@@ -73,25 +96,42 @@ export default function AddBankScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Ionicons name="close" size={24} color={c.text} />
         </Pressable>
-        <Text style={[styles.title, { color: c.text }]}>Add Bank Account</Text>
+        <Text style={[styles.title, { color: c.text }]}>Add Account</Text>
         <Pressable
           onPress={handleSave}
-          disabled={!selectedBank || saving}
-          style={({ pressed }) => [{ opacity: selectedBank && !saving ? (pressed ? 0.7 : 1) : 0.4 }]}
+          disabled={!isCashSelected && !selectedBank || saving}
+          style={({ pressed }) => [{ opacity: (isCashSelected || selectedBank) && !saving ? (pressed ? 0.7 : 1) : 0.4 }]}
         >
           <Ionicons name="checkmark" size={24} color={c.primary} />
         </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <Text style={[styles.sectionLabel, { color: c.text }]}>Select Bank</Text>
+        <Text style={[styles.sectionLabel, { color: c.text }]}>Select Account Type</Text>
         <View style={styles.bankGrid}>
+          {/* Cash option */}
+          <Pressable
+            onPress={handleSelectCash}
+            style={[
+              styles.bankItem,
+              { borderColor: c.border, backgroundColor: c.surface },
+              isCashSelected && { borderColor: c.income, backgroundColor: c.income + "10" },
+            ]}
+          >
+            <View style={[styles.bankLogo, { backgroundColor: c.income }]}>
+              <Ionicons name="cash" size={20} color="#FFFFFF" />
+            </View>
+            <Text style={[styles.bankName, { color: c.text }, isCashSelected && { fontFamily: "Rubik_600SemiBold" as const }]} numberOfLines={1}>
+              Cash
+            </Text>
+          </Pressable>
+
           {BANKS.map((bank) => {
-            const isSelected = selectedBank?.id === bank.id;
+            const isSelected = !isCashSelected && selectedBank?.id === bank.id;
             return (
               <Pressable
                 key={bank.id}
-                onPress={() => setSelectedBank(bank)}
+                onPress={() => handleSelectBank(bank)}
                 style={[
                   styles.bankItem,
                   { borderColor: c.border, backgroundColor: c.surface },
@@ -113,7 +153,40 @@ export default function AddBankScreen() {
           })}
         </View>
 
-        {selectedBank && (
+        {/* Cash form */}
+        {isCashSelected && (
+          <>
+            <Text style={[styles.sectionLabel, { color: c.text }]}>Cash on Hand (ETB)</Text>
+            <View style={[styles.balanceRow, { backgroundColor: c.surfaceSecondary }]}>
+              <Text style={[styles.currencyLabel, { color: c.textSecondary }]}>ETB</Text>
+              <TextInput
+                style={[styles.balanceInput, { color: c.text }]}
+                placeholder="0.00"
+                placeholderTextColor={c.textTertiary}
+                keyboardType="decimal-pad"
+                value={balance}
+                onChangeText={setBalance}
+                autoFocus
+              />
+            </View>
+
+            <View style={[styles.cashHint, { backgroundColor: c.income + "08", borderColor: c.income + "20" }]}>
+              <Ionicons name="information-circle-outline" size={16} color={c.income} />
+              <Text style={[styles.cashHintText, { color: c.textSecondary }]}>
+                Your cash balance will automatically update when you add income or expense transactions with "Cash" as the payment method.
+              </Text>
+            </View>
+
+            <Pressable style={[styles.saveBtn, { backgroundColor: c.primary }]} onPress={handleSave} disabled={saving}>
+              <Text style={[styles.saveBtnText, { color: c.textInverse }]}>
+                {saving ? "Saving..." : "Set Cash Balance"}
+              </Text>
+            </Pressable>
+          </>
+        )}
+
+        {/* Bank form */}
+        {selectedBank && !isCashSelected && (
           <>
             <Text style={[styles.sectionLabel, { color: c.text }]}>Account Name (optional)</Text>
             <TextInput
@@ -327,6 +400,21 @@ const styles = StyleSheet.create({
     fontFamily: "Rubik_400Regular",
     color: Colors.income,
     lineHeight: 17,
+  },
+  cashHint: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 16,
+  },
+  cashHintText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: "Rubik_400Regular",
+    lineHeight: 18,
   },
   saveBtn: {
     backgroundColor: Colors.primary,

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   Pressable,
   Platform,
   RefreshControl,
+  Modal,
+  TextInput,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -23,8 +25,23 @@ import Colors from "@/constants/colors";
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
-  const { transactions, bankAccounts, categories, totalBalance, cashBalance, friendsNet, overallNetBalance, friends, refreshData, isLoading } = useApp();
+  const { transactions, bankAccounts, categories, totalBalance, cashBalance, friendsNet, overallNetBalance, friends, refreshData, isLoading, setCashBalance } = useApp();
   const webTopInset = Platform.OS === "web" ? 67 : 0;
+
+  const [cashModalVisible, setCashModalVisible] = useState(false);
+  const [cashInput, setCashInput] = useState("");
+
+  const handleOpenCashModal = () => {
+    setCashInput(cashBalance > 0 ? cashBalance.toString() : "");
+    setCashModalVisible(true);
+  };
+
+  const handleSaveCash = async () => {
+    const num = parseFloat(cashInput) || 0;
+    await setCashBalance(num);
+    setCashModalVisible(false);
+    if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
 
   const monthlyStats = useMemo(() => {
     const month = getCurrentMonth();
@@ -82,7 +99,7 @@ export default function HomeScreen() {
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.accountsRow}>
               <Pressable
                 style={[styles.cashCard, { backgroundColor: c.surface, borderColor: c.borderLight }]}
-                onPress={() => {}}
+                onPress={handleOpenCashModal}
               >
                 <View style={[styles.cashIcon, { backgroundColor: c.primary + "15" }]}>
                   <Ionicons name="cash-outline" size={22} color={c.primary} />
@@ -199,6 +216,37 @@ export default function HomeScreen() {
       >
         <Ionicons name="add" size={28} color={c.textInverse} />
       </Pressable>
+
+      <Modal visible={cashModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setCashModalVisible(false)}>
+          <Pressable style={[styles.modalContent, { backgroundColor: c.surface, borderColor: c.border }]} onPress={(e) => e.stopPropagation()}>
+            <Text style={[styles.modalTitle, { color: c.text }]}>Edit Cash Balance</Text>
+            <Text style={[styles.modalSubtitle, { color: c.textSecondary }]}>
+              Set your current cash on hand
+            </Text>
+            <View style={[styles.modalBalanceRow, { backgroundColor: c.surfaceSecondary }]}>
+              <Text style={[styles.modalCurrency, { color: c.textSecondary }]}>ETB</Text>
+              <TextInput
+                style={[styles.modalBalanceInput, { color: c.text }]}
+                value={cashInput}
+                onChangeText={setCashInput}
+                placeholder="0.00"
+                placeholderTextColor={c.textTertiary}
+                keyboardType="decimal-pad"
+                autoFocus
+              />
+            </View>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalBtnSecondary} onPress={() => setCashModalVisible(false)}>
+                <Text style={[styles.modalBtnSecondaryText, { color: c.textSecondary }]}>Cancel</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtnPrimary, { backgroundColor: c.primary }]} onPress={handleSaveCash}>
+                <Text style={[styles.modalBtnPrimaryText, { color: c.textInverse }]}>Save</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -391,5 +439,69 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     shadowRadius: 12,
     elevation: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "Rubik_700Bold",
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontFamily: "Rubik_400Regular",
+    marginBottom: 20,
+  },
+  modalBalanceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    marginBottom: 20,
+  },
+  modalCurrency: {
+    fontSize: 16,
+    fontFamily: "Rubik_700Bold",
+  },
+  modalBalanceInput: {
+    flex: 1,
+    fontSize: 24,
+    fontFamily: "Rubik_700Bold",
+    paddingVertical: 14,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "flex-end",
+  },
+  modalBtnSecondary: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  modalBtnSecondaryText: {
+    fontSize: 16,
+    fontFamily: "Rubik_600SemiBold",
+  },
+  modalBtnPrimary: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  modalBtnPrimaryText: {
+    fontSize: 16,
+    fontFamily: "Rubik_600SemiBold",
   },
 });

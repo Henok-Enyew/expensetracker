@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   Pressable,
   TextInput,
@@ -58,9 +59,11 @@ export function AppLockScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <View style={styles.content}>
-        <View style={[styles.iconWrap, { backgroundColor: c.primary + "18" }]}>
-          <Ionicons name="lock-closed" size={48} color={c.primary} />
-        </View>
+        <Image
+          source={require("@/assets/images/icon.png")}
+          style={styles.appLogo}
+          resizeMode="contain"
+        />
         <Text style={[styles.title, { color: c.text }]}>Birr Track is locked</Text>
         <Text style={[styles.subtitle, { color: c.textSecondary }]}>Unlock to continue</Text>
 
@@ -119,13 +122,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: "center",
   },
-  iconWrap: {
+  appLogo: {
     width: 88,
     height: 88,
-    borderRadius: 44,
-    backgroundColor: Colors.primary + "18",
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 22,
     marginBottom: 20,
   },
   title: {

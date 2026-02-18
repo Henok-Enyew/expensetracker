@@ -59,3 +59,63 @@ export function getMonthName(monthStr: string): string {
   const d = new Date(parseInt(year), parseInt(month) - 1);
   return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
+
+import type { BudgetPeriod } from "./types";
+
+/**
+ * Returns the start and end dates (YYYY-MM-DD) for a given budget period.
+ * Transactions whose `date` field is >= start and <= end fall within this window.
+ */
+export function getPeriodDateRange(period: BudgetPeriod): { start: string; end: string; label: string } {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const d = now.getDate();
+
+  switch (period) {
+    case "daily": {
+      const today = getToday();
+      return { start: today, end: today, label: "Today" };
+    }
+    case "weekly": {
+      const day = now.getDay();
+      const mondayOffset = day === 0 ? -6 : 1 - day;
+      const monday = new Date(y, m, d + mondayOffset);
+      const sunday = new Date(y, m, d + mondayOffset + 6);
+      return {
+        start: fmtDate(monday),
+        end: fmtDate(sunday),
+        label: `${monday.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${sunday.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+      };
+    }
+    case "monthly": {
+      const firstDay = new Date(y, m, 1);
+      const lastDay = new Date(y, m + 1, 0);
+      return {
+        start: fmtDate(firstDay),
+        end: fmtDate(lastDay),
+        label: now.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+      };
+    }
+    case "yearly": {
+      return {
+        start: `${y}-01-01`,
+        end: `${y}-12-31`,
+        label: `${y}`,
+      };
+    }
+  }
+}
+
+function fmtDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function getPeriodLabel(period: BudgetPeriod): string {
+  switch (period) {
+    case "daily": return "Daily";
+    case "weekly": return "Weekly";
+    case "monthly": return "Monthly";
+    case "yearly": return "Yearly";
+  }
+}

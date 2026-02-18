@@ -84,7 +84,24 @@ export async function deleteBankAccount(id: string): Promise<void> {
 }
 
 export async function getBudgets(): Promise<Budget[]> {
-  return getItem<Budget[]>(KEYS.BUDGETS, []);
+  const raw = await getItem<any[]>(KEYS.BUDGETS, []);
+  let needsSave = false;
+  const migrated: Budget[] = raw.map((b) => {
+    if (b.month && !b.period) {
+      needsSave = true;
+      const { month, ...rest } = b;
+      return { ...rest, period: "monthly" as const, createdAt: b.createdAt || new Date().toISOString() };
+    }
+    if (!b.createdAt) {
+      needsSave = true;
+      return { ...b, createdAt: new Date().toISOString() };
+    }
+    return b as Budget;
+  });
+  if (needsSave) {
+    await setItem(KEYS.BUDGETS, migrated);
+  }
+  return migrated;
 }
 
 export async function saveBudgets(budgets: Budget[]): Promise<void> {
