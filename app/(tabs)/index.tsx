@@ -2,7 +2,6 @@ import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ScrollView,
   Pressable,
@@ -92,14 +91,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <View>
-          <View style={styles.headerTitleRow}>
-            <Image
-              source={require("@/assets/images/icon.png")}
-              style={styles.headerLogo}
-              resizeMode="contain"
-            />
-            <Text style={[styles.greeting, { color: c.text }]}>Birr Track</Text>
-          </View>
+          <Text style={[styles.greeting, { color: c.text }]}>Birr Track</Text>
           <Text style={[styles.subtitle, { color: c.textSecondary }]}>
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
@@ -437,15 +429,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 16,
-  },
-  headerTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  headerLogo: {
-    width: 28,
-    height: 28,
   },
   greeting: {
     fontSize: 26,

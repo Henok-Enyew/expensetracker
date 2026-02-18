@@ -2,12 +2,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AppLockScreen } from "@/components/AppLockScreen";
-import { useColors } from "@/contexts/ThemeContext";
 import { queryClient } from "@/lib/query-client";
 import { AppProvider } from "@/contexts/AppContext";
 import { SecurityProvider, useSecurity } from "@/contexts/SecurityContext";
@@ -22,6 +21,9 @@ import {
 } from "@expo-google-fonts/rubik";
 
 SplashScreen.preventAutoHideAsync();
+
+// Suppress keep-awake errors from Expo dev client on some Android devices
+LogBox.ignoreLogs(["Unable to activate keep awake", "Unable to deactivate keep awake"]);
 
 function RootLayoutNav() {
   const c = useColors();
