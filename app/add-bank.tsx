@@ -228,8 +228,8 @@ export default function AddBankScreen() {
                     <Switch
                       value={enableSmsSync}
                       onValueChange={handleToggleSmsSync}
-                      trackColor={{ false: c.border, true: c.primary + "60" }}
-                      thumbColor={enableSmsSync ? c.primary : c.surface}
+                      trackColor={{ false: c.textTertiary + "50", true: c.primary + "60" }}
+                      thumbColor={enableSmsSync ? c.primary : c.textSecondary}
                     />
                   </View>
                   {enableSmsSync && (

@@ -228,8 +228,8 @@ export default function BankDetailScreen() {
                 <Switch
                   value={!!account.smsSyncEnabled}
                   onValueChange={handleToggleSync}
-                  trackColor={{ false: c.border, true: c.primary + "60" }}
-                  thumbColor={account.smsSyncEnabled ? c.primary : c.surface}
+                  trackColor={{ false: c.textTertiary + "50", true: c.primary + "60" }}
+                  thumbColor={account.smsSyncEnabled ? c.primary : c.textSecondary}
                 />
               </View>
               {account.smsSyncEnabled && (

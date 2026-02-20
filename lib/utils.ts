@@ -54,6 +54,25 @@ export function getCurrentMonth(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function fmtDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/** Last 7 days including today. */
+export function getLast7DaysRange(): { start: string; end: string } {
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(start.getDate() - 6);
+  return { start: fmtDate(start), end: fmtDate(end) };
+}
+
+/** From Jan 1 of current year to today. */
+export function getThisYearRange(): { start: string; end: string } {
+  const end = new Date();
+  const start = new Date(end.getFullYear(), 0, 1);
+  return { start: fmtDate(start), end: fmtDate(end) };
+}
+
 export function getMonthName(monthStr: string): string {
   const [year, month] = monthStr.split("-");
   const d = new Date(parseInt(year), parseInt(month) - 1);
@@ -105,10 +124,6 @@ export function getPeriodDateRange(period: BudgetPeriod): { start: string; end: 
       };
     }
   }
-}
-
-function fmtDate(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export function getPeriodLabel(period: BudgetPeriod): string {

@@ -25,8 +25,11 @@ import { useApp } from "@/contexts/AppContext";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
 import { buildTransactionsPdfHtml } from "@/lib/pdfExport";
+import { getToday, getCurrentMonth, getLast7DaysRange, getThisYearRange } from "@/lib/utils";
 import { useTheme, useColors } from "@/contexts/ThemeContext";
 import Colors from "@/constants/colors";
+
+type ExportDatePreset = "today" | "last7" | "month" | "year" | "custom";
 
 interface SettingItemProps {
   icon: string;
@@ -64,7 +67,7 @@ function SettingItem({ icon, iconFamily = "Ionicons", label, subtitle, onPress, 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const c = useColors();
-  const { transactions, categories, totalBalance, overallNetBalance, refreshData } = useApp();
+  const { transactions, categories, bankAccounts, totalBalance, overallNetBalance, refreshData } = useApp();
   const {
     hasPermission: smsPermission,
     checking: smsChecking,
@@ -91,6 +94,12 @@ export default function SettingsScreen() {
   const [disablePinModalVisible, setDisablePinModalVisible] = useState(false);
   const [disablePinValue, setDisablePinValue] = useState("");
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [exportModalVisible, setExportModalVisible] = useState(false);
+  const [exportBankMode, setExportBankMode] = useState<"all" | "selected">("all");
+  const [exportSelectedBankIds, setExportSelectedBankIds] = useState<Set<string>>(new Set());
+  const [exportDatePreset, setExportDatePreset] = useState<ExportDatePreset>("month");
+  const [exportDateFrom, setExportDateFrom] = useState("");
+  const [exportDateTo, setExportDateTo] = useState("");
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
   // SMS listener callback is now managed globally by SmsListenerProvider
@@ -182,15 +191,66 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleExport = async () => {
-    if (transactions.length === 0) {
-      Alert.alert("No Data", "There are no transactions to export.");
+  const getExportDateRange = (): { start: string; end: string } => {
+    const today = getToday();
+    switch (exportDatePreset) {
+      case "today":
+        return { start: today, end: today };
+      case "last7":
+        return getLast7DaysRange();
+      case "month": {
+        const month = getCurrentMonth();
+        const [y, m] = month.split("-").map(Number);
+        const lastDay = new Date(y, m, 0);
+        const end = `${y}-${String(m).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
+        return { start: `${month}-01`, end };
+      }
+      case "year":
+        return getThisYearRange();
+      case "custom":
+        return { start: exportDateFrom || today, end: exportDateTo || today };
+      default:
+        return { start: today, end: today };
+    }
+  };
+
+  const handleGeneratePdfFromFilters = async () => {
+    const { start, end } = getExportDateRange();
+    let filtered = transactions.filter((t) => t.date >= start && t.date <= end);
+    if (exportBankMode === "selected" && exportSelectedBankIds.size > 0) {
+      const includeCash = exportSelectedBankIds.has("__cash__");
+      const bankIds = [...exportSelectedBankIds].filter((id) => id !== "__cash__");
+      filtered = filtered.filter((t) => {
+        if (t.bankAccountId == null) return includeCash;
+        return bankIds.includes(t.bankAccountId);
+      });
+    }
+    if (filtered.length === 0) {
+      Alert.alert("No Data", "No transactions match the selected filters.");
       return;
     }
+    setExportModalVisible(false);
     setExporting(true);
     try {
-      const totalIncome = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-      const totalExpense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+      const totalIncome = filtered.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+      const totalExpense = filtered.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+      const dateLabel =
+        exportDatePreset === "custom"
+          ? `${exportDateFrom} to ${exportDateTo}`
+          : exportDatePreset === "today"
+            ? "Today"
+            : exportDatePreset === "last7"
+              ? "Last 7 days"
+              : exportDatePreset === "month"
+                ? "This month"
+                : "This year";
+      const bankLabel =
+        exportBankMode === "all"
+          ? "All banks"
+          : (bankAccounts.filter((a) => exportSelectedBankIds.has(a.id)).map((a) => a.accountName).join(", ") +
+            (exportSelectedBankIds.has("__cash__") ? " + Cash" : "")) || "None selected";
+      const filterLabel = `Banks: ${bankLabel}. Date: ${dateLabel}.`;
+
       let logoBase64: string | null = null;
       try {
         const asset = Asset.fromModule(require("@/assets/images/icon.png"));
@@ -201,11 +261,11 @@ export default function SettingsScreen() {
           });
         }
       } catch {
-        // Logo optional; PDF still works without it
+        // Logo optional
       }
       const html = buildTransactionsPdfHtml(
         {
-          transactions,
+          transactions: filtered,
           categories,
           totalBalance,
           overallNetBalance,
@@ -213,13 +273,14 @@ export default function SettingsScreen() {
           totalExpense,
         },
         logoBase64,
+        { filterLabel },
       );
       if (Platform.OS === "web") {
         const win = window.open("", "_blank");
         if (win) {
           win.document.write(html);
           win.document.close();
-          Alert.alert("Export", "Use your browser’s Print (Ctrl+P / Cmd+P) and choose “Save as PDF” to download.");
+          Alert.alert("Export", "Use your browser's Print (Ctrl+P / Cmd+P) and choose \"Save as PDF\" to download.");
         } else {
           Alert.alert("Export Failed", "Please allow pop-ups and try again.");
         }
@@ -246,6 +307,15 @@ export default function SettingsScreen() {
     } finally {
       setExporting(false);
     }
+  };
+
+  const toggleExportBankSelection = (id: string) => {
+    setExportSelectedBankIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const handleClearData = () => {
@@ -287,8 +357,8 @@ export default function SettingsScreen() {
             <Switch
               value={appLockEnabled}
               onValueChange={handleAppLockToggle}
-              trackColor={{ false: c.border, true: c.primary + "60" }}
-              thumbColor={appLockEnabled ? c.primary : c.surface}
+              trackColor={{ false: c.textTertiary + "50", true: c.primary + "60" }}
+              thumbColor={appLockEnabled ? c.primary : c.textSecondary}
             />
           </View>
         </View>
@@ -349,7 +419,13 @@ export default function SettingsScreen() {
             icon="download-outline"
             label="Export Transactions"
             subtitle="Export as PDF file"
-            onPress={handleExport}
+            onPress={() => {
+              if (transactions.length === 0) {
+                Alert.alert("No Data", "There are no transactions to export.");
+              } else {
+                setExportModalVisible(true);
+              }
+            }}
             colors={c}
           />
           <SettingItem
@@ -537,6 +613,129 @@ export default function SettingsScreen() {
           </Pressable>
         </Pressable>
       </Modal>
+
+      <Modal visible={exportModalVisible} transparent animationType="fade">
+        <Pressable style={styles.modalOverlay} onPress={() => setExportModalVisible(false)}>
+          <Pressable
+            style={[styles.exportModalContent, { backgroundColor: c.surface, borderColor: c.border }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={[styles.modalTitle, { color: c.text }]}>Export PDF</Text>
+            <Text style={[styles.modalSubtitle, { color: c.textSecondary, marginBottom: 16 }]}>
+              Choose banks and date range for the report.
+            </Text>
+
+            <Text style={[styles.exportFilterLabel, { color: c.text }]}>Banks</Text>
+            <View style={styles.exportFilterRow}>
+              <Pressable
+                style={[
+                  styles.exportChip,
+                  { borderColor: c.borderLight, backgroundColor: exportBankMode === "all" ? c.primary + "15" : c.surface },
+                ]}
+                onPress={() => setExportBankMode("all")}
+              >
+                <Text style={[styles.exportChipText, { color: exportBankMode === "all" ? c.primary : c.textSecondary }]}>All banks</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  styles.exportChip,
+                  { borderColor: c.borderLight, backgroundColor: exportBankMode === "selected" ? c.primary + "15" : c.surface },
+                ]}
+                onPress={() => setExportBankMode("selected")}
+              >
+                <Text style={[styles.exportChipText, { color: exportBankMode === "selected" ? c.primary : c.textSecondary }]}>Selected</Text>
+              </Pressable>
+            </View>
+            {exportBankMode === "selected" && (
+              <ScrollView style={styles.exportBankList} nestedScrollEnabled>
+                {bankAccounts.map((acc) => (
+                  <Pressable
+                    key={acc.id}
+                    style={styles.exportBankRow}
+                    onPress={() => toggleExportBankSelection(acc.id)}
+                  >
+                    <Ionicons
+                      name={exportSelectedBankIds.has(acc.id) ? "checkbox" : "square-outline"}
+                      size={22}
+                      color={exportSelectedBankIds.has(acc.id) ? c.primary : c.textTertiary}
+                    />
+                    <Text style={[styles.exportBankName, { color: c.text }]}>{acc.accountName}</Text>
+                  </Pressable>
+                ))}
+                <Pressable
+                  style={styles.exportBankRow}
+                  onPress={() => toggleExportBankSelection("__cash__")}
+                >
+                  <Ionicons
+                    name={exportSelectedBankIds.has("__cash__") ? "checkbox" : "square-outline"}
+                    size={22}
+                    color={exportSelectedBankIds.has("__cash__") ? c.primary : c.textTertiary}
+                  />
+                  <Text style={[styles.exportBankName, { color: c.text }]}>Cash</Text>
+                </Pressable>
+              </ScrollView>
+            )}
+
+            <Text style={[styles.exportFilterLabel, { color: c.text, marginTop: 16 }]}>Date range</Text>
+            <View style={styles.exportFilterRow}>
+              {(["today", "last7", "month", "year"] as const).map((preset) => (
+                <Pressable
+                  key={preset}
+                  style={[
+                    styles.exportChipSmall,
+                    { borderColor: c.borderLight, backgroundColor: exportDatePreset === preset ? c.primary + "15" : c.surface },
+                  ]}
+                  onPress={() => setExportDatePreset(preset)}
+                >
+                  <Text style={[styles.exportChipTextSmall, { color: exportDatePreset === preset ? c.primary : c.textSecondary }]}>
+                    {preset === "today" ? "Today" : preset === "last7" ? "Last 7d" : preset === "month" ? "Month" : "Year"}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+            <Pressable
+              style={[
+                styles.exportChip,
+                { borderColor: c.borderLight, backgroundColor: exportDatePreset === "custom" ? c.primary + "15" : c.surface, marginTop: 6 },
+              ]}
+              onPress={() => setExportDatePreset("custom")}
+            >
+              <Text style={[styles.exportChipText, { color: exportDatePreset === "custom" ? c.primary : c.textSecondary }]}>Custom range</Text>
+            </Pressable>
+            {exportDatePreset === "custom" && (
+              <View style={styles.exportCustomRow}>
+                <TextInput
+                  style={[styles.exportDateInput, { borderColor: c.border, color: c.text }]}
+                  value={exportDateFrom}
+                  onChangeText={setExportDateFrom}
+                  placeholder="From (YYYY-MM-DD)"
+                  placeholderTextColor={c.textTertiary}
+                />
+                <TextInput
+                  style={[styles.exportDateInput, { borderColor: c.border, color: c.text }]}
+                  value={exportDateTo}
+                  onChangeText={setExportDateTo}
+                  placeholder="To (YYYY-MM-DD)"
+                  placeholderTextColor={c.textTertiary}
+                />
+              </View>
+            )}
+
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.modalButtonSecondary} onPress={() => setExportModalVisible(false)}>
+                <Text style={[styles.modalButtonSecondaryText, { color: c.textSecondary }]}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButtonPrimary, { backgroundColor: c.primary }]}
+                onPress={handleGeneratePdfFromFilters}
+                disabled={exporting}
+              >
+                <Text style={[styles.modalButtonPrimaryText, { color: c.textInverse }]}>{exporting ? "Generating…" : "Generate PDF"}</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -635,6 +834,74 @@ const styles = StyleSheet.create({
     padding: 24,
     borderWidth: 1,
     borderColor: Colors.border,
+  },
+  exportModalContent: {
+    width: "100%",
+    maxWidth: 360,
+    maxHeight: "85%",
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  exportFilterLabel: {
+    fontSize: 13,
+    fontFamily: "Rubik_600SemiBold",
+    marginBottom: 8,
+  },
+  exportFilterRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  exportChip: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  exportChipText: {
+    fontSize: 14,
+    fontFamily: "Rubik_500Medium",
+  },
+  exportChipSmall: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1.5,
+  },
+  exportChipTextSmall: {
+    fontSize: 12,
+    fontFamily: "Rubik_500Medium",
+  },
+  exportBankList: {
+    maxHeight: 140,
+    marginTop: 8,
+  },
+  exportBankRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 8,
+  },
+  exportBankName: {
+    fontSize: 14,
+    fontFamily: "Rubik_400Regular",
+  },
+  exportCustomRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 10,
+  },
+  exportDateInput: {
+    flex: 1,
+    height: 44,
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    fontFamily: "Rubik_400Regular",
   },
   modalTitle: {
     fontSize: 18,

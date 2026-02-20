@@ -32,7 +32,11 @@ export interface PdfExportData {
  * Generates a full HTML document for PDF export: header with logo/title,
  * summary stats, transactions table, and footer.
  */
-export function buildTransactionsPdfHtml(data: PdfExportData, logoBase64: string | null): string {
+export function buildTransactionsPdfHtml(
+  data: PdfExportData,
+  logoBase64: string | null,
+  options?: { filterLabel?: string },
+): string {
   const {
     transactions,
     categories,
@@ -42,9 +46,15 @@ export function buildTransactionsPdfHtml(data: PdfExportData, logoBase64: string
     totalExpense,
   } = data;
 
-  const logoImg = logoBase64
-    ? `<img src="data:image/png;base64,${logoBase64}" alt="Birr Track" style="width:48px;height:48px;border-radius:12px;object-fit:contain;" />`
-    : "";
+  const logoImg =
+    logoBase64 != null && logoBase64 !== ""
+      ? `<img src="data:image/png;base64,${logoBase64}" alt="Birr Track" style="width:48px;height:48px;border-radius:12px;object-fit:contain;" />`
+      : `<div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;">BT</div>`;
+
+  const filterNote =
+    options?.filterLabel != null && options.filterLabel !== ""
+      ? `<p style="margin:6px 0 0;font-size:11px;color:rgba(255,255,255,0.85);">${escapeHtml(options.filterLabel)}</p>`
+      : "";
 
   const header = `
     <div style="background:linear-gradient(135deg, ${PRIMARY_LIGHT}, ${PRIMARY});padding:20px 24px;border-radius:16px;margin-bottom:20px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 12px rgba(69,35,78,0.2);">
@@ -52,6 +62,7 @@ export function buildTransactionsPdfHtml(data: PdfExportData, logoBase64: string
       <div>
         <h1 style="margin:0;font-size:26px;font-weight:700;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">Birr Track</h1>
         <p style="margin:4px 0 0;font-size:12px;color:rgba(255,255,255,0.8);">Transaction export</p>
+        ${filterNote}
       </div>
     </div>`;
 
