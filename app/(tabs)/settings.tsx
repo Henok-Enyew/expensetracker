@@ -21,6 +21,7 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
+import * as Updates from "expo-updates";
 import { useApp } from "@/contexts/AppContext";
 import { useSecurity } from "@/contexts/SecurityContext";
 import { useSmsPermission } from "@/hooks/useSmsPermission";
@@ -100,6 +101,7 @@ export default function SettingsScreen() {
   const [exportDatePreset, setExportDatePreset] = useState<ExportDatePreset>("month");
   const [exportDateFrom, setExportDateFrom] = useState("");
   const [exportDateTo, setExportDateTo] = useState("");
+  const [updateChecking, setUpdateChecking] = useState(false);
   const webTopInset = Platform.OS === "web" ? 67 : 0;
 
   // SMS listener callback is now managed globally by SmsListenerProvider
@@ -483,6 +485,37 @@ export default function SettingsScreen() {
             onPress={() => setCurrencyModalVisible(true)}
             colors={c}
           />
+          {!__DEV__ && (
+            <SettingItem
+              icon="cloud-download-outline"
+              label="Check for updates"
+              subtitle={updateChecking ? "Checking…" : "Get the latest app version without reinstalling"}
+              onPress={async () => {
+                setUpdateChecking(true);
+                try {
+                  const update = await Updates.checkForUpdateAsync();
+                  if (update.isAvailable) {
+                    await Updates.fetchUpdateAsync();
+                    Alert.alert(
+                      "Update ready",
+                      "Restart the app now to use the latest version? Your data will be kept.",
+                      [
+                        { text: "Later", style: "cancel" },
+                        { text: "Restart", onPress: () => Updates.reloadAsync() },
+                      ],
+                    );
+                  } else {
+                    Alert.alert("Up to date", "You're already on the latest version.");
+                  }
+                } catch (e) {
+                  Alert.alert("Update check failed", e instanceof Error ? e.message : "Could not check for updates.");
+                } finally {
+                  setUpdateChecking(false);
+                }
+              }}
+              colors={c}
+            />
+          )}
           <SettingItem
             icon="information-circle-outline"
             label="About"

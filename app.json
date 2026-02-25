@@ -8,6 +8,13 @@
     "scheme": "birrtrack",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": { "policy": "appVersion" },
+    "updates": {
+      "url": "https://u.expo.dev/440d99fa-5e60-4f7b-b494-2b0a3ee3259d",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -16,46 +23,30 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.birrtrack",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
     },
     "android": {
       "package": "com.birrtrack",
-      "permissions": [
-        "android.permission.READ_SMS",
-        "android.permission.RECEIVE_SMS"
-      ],
+      "versionCode": 1,
+      "permissions": ["android.permission.READ_SMS", "android.permission.RECEIVE_SMS"],
       "adaptiveIcon": {
         "backgroundColor": "#45234E",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       }
     },
-    "web": {
-      "favicon": "./assets/images/favicon.png"
-    },
+    "web": { "favicon": "./assets/images/favicon.png" },
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://replit.com/"
-        }
-      ],
+      ["expo-router", { "origin": "https://replit.com/" }],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-updates",
+      "./plugins/withAndroidReleaseSigning.js"
     ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
+    "experiments": { "typedRoutes": true, "reactCompiler": true },
     "extra": {
-      "router": {
-        "origin": "https://replit.com/"
-      },
-      "eas": {
-        "projectId": "440d99fa-5e60-4f7b-b494-2b0a3ee3259d"
-      }
+      "router": { "origin": "https://replit.com/" },
+      "eas": { "projectId": "440d99fa-5e60-4f7b-b494-2b0a3ee3259d" }
     }
   }
 }

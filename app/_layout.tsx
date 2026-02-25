@@ -1,6 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as Updates from "expo-updates";
 import React, { useEffect } from "react";
 import { View, LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -92,8 +93,11 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
+    if (!fontsLoaded) return;
+    SplashScreen.hideAsync();
+    // In production builds, check for OTA updates on load (download in background; apply on next launch)
+    if (!__DEV__) {
+      Updates.checkForUpdateAsync().catch(() => {});
     }
   }, [fontsLoaded]);
 
