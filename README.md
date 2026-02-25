@@ -15,6 +15,7 @@
   <img src="https://img.shields.io/badge/Expo-SDK%2054-000020?style=flat-square&logo=expo" alt="Expo" />
   <img src="https://img.shields.io/badge/TypeScript-5.9-3178c6?style=flat-square&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Platform-Android-3ddc84?style=flat-square&logo=android" alt="Android" />
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License: MIT" />
 </p>
 
 ---
@@ -225,10 +226,17 @@ User taps "Scan & Import" on Bank Detail
 
 ## 👤 About
 
-**Birr Track** is built by **Henok Enyew** (Software Engineer). For bug reports and feature requests, reach out via [henokenyew.me](https://henokenyew.me).
+**Birr Track** is built by **[Henok Enyew](https://henokenyew.me)** (Software Engineer).  
+For bug reports and feature requests, reach out via [henokenyew.me](https://henokenyew.me).
+
+---
+
+## 📜 License
+
+This project is open source and available under the **[MIT License](LICENSE)**.
 
 ---
 
 <p align="center">
-  <strong>© 2026 Ethiopia. All rights reserved.</strong>
+  <strong>Built by <a href="https://henokenyew.me">Henok Enyew</a></strong>
 </p>
